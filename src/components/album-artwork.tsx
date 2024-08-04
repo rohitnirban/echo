@@ -3,8 +3,14 @@ import { cn } from "@/lib/utils";
 import decodeHTMLEntities from "@/helpers/decodeHTMLEntities";
 import { useMediaPlayer } from "@/context/MediaPlayerContext";
 import getSongsSuggestions from "@/helpers/getSongsSuggestions";
-import { IconPlayerPlayFilled } from '@tabler/icons-react';
-import { MoreVertical } from "lucide-react";
+import { IconPlayerPlayFilled, IconPlayerTrackNextFilled, IconPlaylistAdd, IconShare } from '@tabler/icons-react';
+import { Library, MoreVertical } from "lucide-react";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "./ui/context-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { Dropdown } from "react-day-picker";
+import axios, { AxiosError } from "axios";
+import { useToast } from "./ui/use-toast";
+import { ApiResponse } from "@/types/ApiResponse";
 
 export interface Album {
   name: string
@@ -31,26 +37,46 @@ export function AlbumArtwork({
   ...props
 }: AlbumArtworkProps) {
   const { isPlaying, handlePlayPause, audioRef, setSongDetails, addToQueue } = useMediaPlayer();
+
   const decodedAlbumName = decodeHTMLEntities(album.name);
+  const { toast } = useToast();
 
   const handlePlay = async () => {
     if (audioRef.current) {
       console.log("First", audioRef.current.src);
       if (!songUrl || !image) return null;
-      
+
       if (isPlaying) {
         audioRef.current.pause();
       }
 
       audioRef.current.src = songUrl;
       console.log("Second", audioRef.current.src);
-      setSongDetails(album.songID, decodedAlbumName, album.artist, image);
+      setSongDetails(album.songID, decodedAlbumName, album.artist, image, album.cover);
       const similarSongs = await getSongsSuggestions(album.songID);
       addToQueue(similarSongs)
       handlePlayPause();
     }
     console.log("Song Played: " + decodedAlbumName);
   };
+
+  const handleAddToLibrary = async (songID: string) => {
+    try {
+      const response = await axios.post(`/api/v1/library/add-song/${songID}`);
+      toast({
+        title: 'Success',
+        description: response.data.message
+      })
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiResponse>;
+      toast({
+        title: "Error",
+        description: axiosError.response?.data.message || "Failed to add song to libaray",
+        variant: "destructive"
+      })
+    }
+
+  }
 
 
 
@@ -73,11 +99,33 @@ export function AlbumArtwork({
             className="w-12 h-12 text-white cursor-pointer"
             onClick={handlePlay}
           />
-          <div className="absolute top-1 right-1 hover:bg-gray-900 hover:bg-opacity-60 p-1 rounded-full">
-            <MoreVertical
-              className="w-6 h-6 text-white cursor-pointer"
-              onClick={handlePlay}
-            />
+          <div className="absolute top-2 right-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="focus:outline-none">
+                <MoreVertical
+                  className="w-6 h-6 text-white cursor-pointer hover:bg-gray-800 hover:bg-opacity-50 rounded-full p-1"
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem>
+                  <IconPlayerTrackNextFilled className="mr-2 h-4 w-4" />
+                  <span>Play Next</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleAddToLibrary(album.songID)}>
+                  <Library className="mr-2 h-4 w-4" />
+                  <span>Add to Library</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem>
+                  <IconPlaylistAdd className="mr-2 h-4 w-4" />
+                  <span>Add to Playlist</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <IconShare className="mr-2 h-4 w-4" />
+                  <span>Share</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>

@@ -7,6 +7,7 @@ import { useMediaPlayer } from "@/context/MediaPlayerContext";
 import { Volume, Volume2 } from "lucide-react";
 import decodeHTMLEntities from "@/helpers/decodeHTMLEntities";
 import Queue from "./queue";
+import { IconArrowBadgeDownFilled, IconArrowBadgeUpFilled } from "@tabler/icons-react";
 
 type MediaPlayerProps = {
     src: string; // MP4 music file URL
@@ -92,15 +93,19 @@ export default function MediaPlayer({ src, songTitle, artist, image }: MediaPlay
                         {isMuted ? <Volume className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
                     </Button>
                     <Button size="icon" variant={"ghost"} onClick={toggleQueue}>
-                        {isQueueVisible ? <XIcon className="w-6 h-6" /> : <QueueIcon className="w-6 h-6" />}
+                        {isQueueVisible ? <IconArrowBadgeDownFilled className="w-6 h-6" /> : <IconArrowBadgeUpFilled className="w-6 h-6" />}
                     </Button>
                 </div>
             </div>
-            {isQueueVisible && (
-                <div className="absolute mb-[5.5rem] bottom-0 right-0 -z-10">
+            {/* {isQueueVisible && (
+                <div className="absolute mb-[5rem] bottom-0 left-0 -z-10 ">
                     <Queue />
                 </div>
-            )}
+
+            )} */}
+            <div className={`absolute mb-[5rem] bottom-0 left-0 -z-10 w-full overflow-auto transition-all duration-300 ease-in-out transform ${isQueueVisible ? 'translate-y-0' : 'translate-y-[100rem]'}`}>
+                <Queue />
+            </div>
         </div>
     );
 }

@@ -22,57 +22,43 @@ interface Artist {
   name: string;
 }
 
-const fetchTrendingSongs = async () => {
-  const response = await axios.get('/api/v1/trending/get-today/10');
-  return response.data.titles;
-};
+const fetchSongsFromSavaan = async () => {
+  const response = await axios.get(
+    'https://saavn-api-sigma.vercel.app/api/search/songs?query=latest'
+  );
 
-const fetchSongsFromSavaan = async (trendingSongs: string[]) => {
-  const currentYear = new Date().getFullYear().toString();
-  const allSongs: SongData[] = [];
+  const data = response.data.data.results;
 
-  for (const songQuery of trendingSongs) {
-    const response = await axios.get(
-      `https://saavn-api-sigma.vercel.app/api/search/songs?query=${encodeURIComponent(songQuery)}&page=1&limit=2`
-    );
-
-    if (response.data.success === true) {
-      const filteredSongs = response.data.data.results.filter(
-        (song: SongData) => song.year === currentYear
-      );
-      allSongs.push(...filteredSongs);
-    }
-  }
-  return allSongs;
+  return data
 };
 
 export default function MusicPage() {
   const { songID, isPlaying } = useMediaPlayer();
 
-  // Fetch trending songs with cache time and stale time set to 24 hours
-  const { data: trendingSongs = [], isLoading: isTrendingLoading } = useQuery(
-    'trendingSongs',
-    fetchTrendingSongs,
+  const { data: songResult = [], isLoading: isSongsLoading, error } = useQuery(
+    'songsFromSavaan',
+    fetchSongsFromSavaan,
     {
-      cacheTime: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
-      staleTime: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+      cacheTime: 24 * 60 * 60 * 1000,
+      staleTime: 24 * 60 * 60 * 1000,
     }
   );
 
-  // Fetch songs from Savaan if trendingSongs is available
-  const { data: songResult = [], isLoading: isSongsLoading } = useQuery(
-    ['songsFromSavaan', trendingSongs],
-    () => fetchSongsFromSavaan(trendingSongs),
-    {
-      enabled: !!trendingSongs.length, // Only fetch if there are trending songs
-      cacheTime: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
-      staleTime: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
-    }
-  );
+  console.log('Song Result:', songResult);
 
-  if (isTrendingLoading || isSongsLoading) {
+  if (error) {
+    console.error('Error fetching songs:', error);
+    return <p>Error loading songs. Please try again later.</p>;
+  }
+
+  if (isSongsLoading) {
     return <p>Loading...</p>;
   }
+
+  if (!songResult || songResult.length === 0) {
+    return <p>No songs found</p>;
+  }
+
 
   return (
     <>
@@ -97,12 +83,12 @@ export default function MusicPage() {
               <div className="relative">
                 <ScrollArea>
                   <div className="flex space-x-4 pb-4">
-                    {songResult.map((song) => (
+                    {songResult.map((song: SongData) => (
                       <div key={song.id} className="flex flex-col space-y-2">
                         <AlbumArtwork
                           album={{
                             songID: song.id,
-                            cover: song.image[1]?.url, // Assuming the first image is the album cover
+                            cover: song.image[1]?.url,
                             name: song.name,
                             artist: song.artists.primary.map((artist) => artist.name).join(", ")
                           }}

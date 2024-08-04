@@ -2,6 +2,7 @@ import Link from "next/link"
 import { CompassIcon, HomeIcon, LibraryIcon, Music2Icon, XIcon } from "lucide-react"
 import { Button } from "./ui/button"
 import { Separator } from "./ui/separator";
+import Image from "next/image";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -13,8 +14,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white text-foreground border-r transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0`}>
       <div className="flex h-16 items-center justify-between px-6">
         <Link href="#" className="flex items-center gap-2 font-semibold" prefetch={false}>
-          <Music2Icon className="h-6 w-6" />
-          <span>YouTube Music</span>
+          <Image src="/logo-without-bg.svg" alt="Logo" height={45} width={45} className="rounded-full h-18 w-18" />
+          <span className="text-2xl font-bold">Echo</span>
         </Link>
         <Button variant="ghost" size="icon" className="md:hidden" onClick={onClose}>
           <XIcon className="h-6 w-6" />
@@ -39,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <span>Explore</span>
         </Link>
         <Link
-          href="#"
+          href="/library"
           className="flex items-center gap-3 rounded-md px-3 py-2 transition-colors hover:bg-muted hover:text-foreground"
           prefetch={false}
         >

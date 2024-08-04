@@ -24,6 +24,7 @@ interface Song {
   artists: { primary: { name: string }[] };
   image: { url: string }[];
   downloadUrl: { url: string }[];
+  duration?:number;
 }
 
 export function Menu() {
@@ -88,7 +89,7 @@ export function Menu() {
       audioRef.current.src = song.downloadUrl[4].url; // Set the new song URL
 
       const decodedAlbumName = decodeHTMLEntities(song.name);
-      setSongDetails(song.id, decodedAlbumName, song.artists.primary[0].name, song.image[0].url);
+      setSongDetails(song.id, decodedAlbumName, song.artists.primary[0].name, song.image[0].url, song.image[2].url);
       const similarSongs = await getSongsSuggestions(song.id);
       addToQueue(similarSongs);
 

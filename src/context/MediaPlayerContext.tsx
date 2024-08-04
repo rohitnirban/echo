@@ -10,6 +10,7 @@ interface Song {
   artists: { primary: { name: string }[] };
   image: { url: string }[];
   downloadUrl: { url: string }[];
+  duration?:number;
 }
 
 interface MediaPlayerContextType {
@@ -18,6 +19,7 @@ interface MediaPlayerContextType {
   songName: string;
   songArtist: string;
   songImage: string;
+  songImageHigh: string;
   currentTime: number;
   duration: number;
   audioRef: React.MutableRefObject<HTMLAudioElement | null>;
@@ -25,7 +27,7 @@ interface MediaPlayerContextType {
   handleTimeUpdate: () => void;
   handleDurationChange: () => void;
   handleSongEnd: () => void;
-  setSongDetails: (id: string, name: string, artist: string, image: string) => void;
+  setSongDetails: (id: string, name: string, artist: string, image: string, imageHigh:string) => void;
   setSongTime: (currentTime: number, duration: number) => void;
   setQueue: (queue: Song[]) => void;
   addToQueue: (songs: Song[]) => void;
@@ -41,6 +43,7 @@ export const MediaPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [songName, setSongName] = useState("");
   const [songArtist, setSongArtist] = useState("");
   const [songImage, setSongImage] = useState("");
+  const [songImageHigh, setSongImageHigh] = useState("");
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [queue, setQueueState] = useState<Song[]>([]);
@@ -74,11 +77,12 @@ export const MediaPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     playNextSong();
   };
 
-  const setSongDetails = (id: string, name: string, artist: string, image: string) => {
+  const setSongDetails = (id: string, name: string, artist: string, image: string, imageHigh:string) => {
     setSongID(id);
     setSongName(name);
     setSongArtist(artist);
     setSongImage(image);
+    setSongImageHigh(imageHigh);
   };
 
   const setSongTime = (currentTime: number, duration: number) => {
@@ -111,7 +115,7 @@ export const MediaPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       const nextSong = queue.shift();
       setQueueState([...queue]); // Update the queue after removing the first song
       if (nextSong) {
-        setSongDetails(nextSong.id, nextSong.name, nextSong.artists.primary[0].name, nextSong.image[0].url);
+        setSongDetails(nextSong.id, nextSong.name, nextSong.artists.primary[0].name, nextSong.image[0].url, nextSong.image[2].url);
         if (audioRef.current) {
           audioRef.current.src = nextSong.downloadUrl[4].url;
           audioRef.current.play();
@@ -129,6 +133,7 @@ export const MediaPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         songName,
         songArtist,
         songImage,
+        songImageHigh,
         currentTime,
         duration,
         audioRef,

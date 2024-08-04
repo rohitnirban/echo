@@ -1,29 +1,30 @@
-'use client'
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import AuthProvider from '../context/AuthProvider';
+import { Toaster } from '@/components/ui/toaster';
 
-import ServerLayout from './server-layout';
-import ClientProviders from './client-providers';
-import Navbar from '@/components/Navbar';
-import Sidebar from '@/components/sidebar';
-import { useState } from 'react';
-import MediaPlayer from '@/components/media-player';
+const inter = Inter({ subsets: ['latin'] });
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+export const metadata: Metadata = {
+  title: 'Echo Music App',
+  description: 'Real Music App.',
+};
 
+interface RootLayoutProps {
+  children: React.ReactNode;
+}
+
+export default async function RootLayout({ children }: RootLayoutProps) {
   return (
-    <ServerLayout>
-      <ClientProviders>
-        <div className="flex h-screen">
-          <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-          <div className="flex flex-col flex-1 overflow-hidden">
-            <Navbar onMenuClick={() => setSidebarOpen(true)} />
-            <main className="flex-1 overflow-auto">
-              {children}
-            </main>
-            <MediaPlayer src={`https://aac.saavncdn.com/129/b52f3689e9e983720250d68e50259dba_320.mp4`} songTitle={`Joota Japani`} artist={`Kr$na`} image={`https://c.saavncdn.com/129/Joota-Japani-Hindi-2024-20240427083457-50x50.jpg`} />
-          </div>
-        </div>
-      </ClientProviders>
-    </ServerLayout>
+    <html lang="en" >
+      <AuthProvider>
+        <body className={inter.className}>
+          {children}
+          <Toaster />
+        </body>
+      </AuthProvider>
+    </html>
   );
 }
+
