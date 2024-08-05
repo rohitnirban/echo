@@ -35,17 +35,18 @@ const fetchSongDetails = async (songId: string) => {
 };
 
 const AlbumArtworkSkeleton = () => (
-  <div className="space-y-3">
-    <Skeleton className="h-[200px] w-[200px] rounded-md" />
+  <div className="space-y-3 w-full">
+    <Skeleton className="h-0 pb-[100%] w-full rounded-md bg-gray-700" />
     <div className="space-y-2">
-      <Skeleton className="h-4 w-[150px]" />
-      <Skeleton className="h-4 w-[100px]" />
+      <Skeleton className="h-4 w-[75%] bg-gray-700" />
+      <Skeleton className="h-4 w-[50%] bg-gray-700" />
     </div>
   </div>
 );
 
 export default function Page() {
-  const { songID, isPlaying } = useMediaPlayer();
+
+  const { songID, isPlaying, addToQueue } = useMediaPlayer();
 
   const { data: librarySongs = [], isLoading: isLibraryLoading } = useQuery(
     'librarySongs',
@@ -57,10 +58,13 @@ export default function Page() {
       return songDetails;
     },
     {
-      cacheTime: 24 * 60 * 60 * 1000,
-      staleTime: 24 * 60 * 60 * 1000,
+      cacheTime: 5 * 1000,
+      staleTime: 5 * 1000,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
     }
   );
+  // TODO : fix the cache problem for library
 
   const skeletons = useMemo(() =>
     Array.from({ length: 10 }).map((_, index) => (
@@ -94,6 +98,13 @@ export default function Page() {
     [librarySongs]
   );
 
+  const NoSongsMessage = () => (
+    <div className="flex flex-col items-center justify-center h-64">
+      <p className="text-xl font-semibold mb-2">No songs in your library</p>
+      <p className="text-muted-foreground">Please add some songs to your library</p>
+    </div>
+  );
+
   return (
     <ScrollArea className="h-full flex flex-col flex-1">
       <main className="flex-1 space-y-4 p-4 pt-6 md:p-8">
@@ -109,9 +120,17 @@ export default function Page() {
           </div>
         </div>
         <Separator className='my-4 shadow' />
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {isLibraryLoading ? skeletons : songItems}
-        </div>
+        {isLibraryLoading ? (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {skeletons}
+          </div>
+        ) : librarySongs.length > 0 ? (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {songItems}
+          </div>
+        ) : (
+          <NoSongsMessage />
+        )}
       </main>
     </ScrollArea>
   )

@@ -22,7 +22,8 @@ export interface User extends Document {
     totalListeningTimeInSeconds: number;
     lastAdPlayedAt: Date;
     lastPlayedSongId: string;
-    subscription: Subscription[]
+    subscription: Subscription[];
+    recentSongs: string[];
 }
 
 const userSchema: Schema<User> = new Schema(
@@ -75,7 +76,12 @@ const userSchema: Schema<User> = new Schema(
         lastPlayedSongId: {
             type: String
         },
-        subscription: [subscriptionSchema]
+        subscription: [subscriptionSchema],
+        recentSongs:[
+            {
+                type:String,
+            }
+        ]
     },
     {
         timestamps: true

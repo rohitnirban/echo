@@ -1,4 +1,4 @@
-import { Library, MenuIcon, MoreVertical, SearchIcon } from 'lucide-react'
+import { CreditCardIcon, MenuIcon, SearchIcon, Settings, UserIcon } from 'lucide-react'
 import React from 'react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
@@ -9,7 +9,8 @@ import { useMediaPlayer } from "@/context/MediaPlayerContext";
 import decodeHTMLEntities from "@/helpers/decodeHTMLEntities";
 import getSongsSuggestions from "@/helpers/getSongsSuggestions";
 import { signOut, useSession } from 'next-auth/react'
-import { IconPlayerTrackNextFilled, IconPlaylistAdd, IconShare } from '@tabler/icons-react'
+import Link from 'next/link'
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 
 interface Song {
     id: string;
@@ -97,84 +98,79 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
         }
     };
 
-    if (session) {
-        return (
-            <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 shadow-sm md:px-6">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" className="md:hidden" onClick={onMenuClick}>
-                        <MenuIcon className="h-6 w-6" />
-                        <span className="sr-only">Toggle Sidebar</span>
-                    </Button>
-                    <div className="relative flex-1">
-                        <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            type="search"
-                            placeholder="Search"
-                            className="w-64 sm:w-96 lg:w-[30rem] rounded-lg border-none outline-none bg-muted pl-8 pr-4 focus:bg-muted"
-                            value={songQuery}
-                            onChange={(e) => setSongQuery(e.target.value)}
-                        />
-                        {isDropdownOpen && (
-                            <div ref={dropdownRef} className="absolute top-full mt-2 w-full bg-white shadow-lg z-50 overflow-auto max-h-96">
-                                {songResult.map((songData, index) => (
-                                    <p key={index} onClick={() => handlePlay(songData)} className="text-left flex items-center p-2 hover:bg-black hover:text-white hover:cursor-pointer">
-                                        <img src={songData.image[0].url} alt="" />
-                                        <p className="flex flex-col justify-center text-left ml-4">
-                                            <span>{songData.name}</span>
-                                            <span>{songData.artists.primary.map(artist => artist.name).join(', ')}</span>
-                                        </p>
-                                        {/* <div className="absolute top-2 right-2">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger className="focus:outline-none">
-                                                    <MoreVertical
-                                                        className="w-6 h-6 text-white cursor-pointer hover:bg-gray-800 hover:bg-opacity-50 rounded-full p-1"
-                                                    />
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent>
-                                                    <DropdownMenuItem>
-                                                        <IconPlayerTrackNextFilled className="mr-2 h-4 w-4" />
-                                                        <span>Play Next</span>
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem>
-                                                        <Library className="mr-2 h-4 w-4" />
-                                                        <span>Add to Library</span>
-                                                    </DropdownMenuItem>
+    return (
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-700 bg-[#020202] px-4 shadow-sm md:px-6">
+            <div className="flex items-center gap-4">
+                <Button variant="ghost" size="icon" className="lg:hidden" onClick={onMenuClick}>
+                    <MenuIcon className="h-6 w-6" />
+                    <span className="sr-only">Toggle Sidebar</span>
+                </Button>
+                <div className="relative flex-1">
+                    <SearchIcon className="absolute left-2.5 top-[12px] h-4 w-4 text-muted-foreground text-white" />
+                    <Input
+                        type="search"
+                        placeholder="Search"
+                        className="w-64 sm:w-96 lg:w-[30rem] rounded-lg pl-10 pr-4 bg-[#292929] text-white border border-gray-700 placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus:border-gray-600 focus:bg-[#020202]"
+                        style={{
+                            outline: 'none !important',
+                            boxShadow: 'none !important',
+                        }}
+                        value={songQuery}
+                        onChange={(e) => setSongQuery(e.target.value)}
+                    />
 
-                                                    <DropdownMenuItem>
-                                                        <IconPlaylistAdd className="mr-2 h-4 w-4" />
-                                                        <span>Add to Playlist</span>
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem>
-                                                        <IconShare className="mr-2 h-4 w-4" />
-                                                        <span>Share</span>
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </div> */}
+                    {isDropdownOpen && (
+                        <div ref={dropdownRef} className="absolute top-full mt-2 w-full bg-[#020202] text-white shadow-lg z-50 overflow-auto max-h-96">
+                            {songResult.map((songData, index) => (
+                                <p key={index} onClick={() => handlePlay(songData)} className="text-left flex items-center p-2 hover:bg-black hover:text-white hover:cursor-pointer">
+                                    <img src={songData.image[0].url} alt="" />
+                                    <p className="flex flex-col justify-center text-left ml-4">
+                                        <span>{songData.name}</span>
+                                        <span>{songData.artists.primary.map(artist => artist.name).join(', ')}</span>
                                     </p>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                                </p>
+                            ))}
+                        </div>
+                    )}
                 </div>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="overflow-hidden rounded-full">
-                            <img src={session.user.image} width={36} height={36} alt="Avatar" className="rounded-full" />
-                            <span className="sr-only">Toggle user menu</span>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>{session.user.username}</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Settings</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => signOut()}>Logout</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </header>
-        )
-    }
+            </div>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="overflow-hidden rounded-full">
+                        <Avatar>
+                            <AvatarImage src={session?.user.image} alt={session?.user.username} />
+                            <AvatarFallback>{session?.user.name}</AvatarFallback>
+                        </Avatar>
+                        <span className="sr-only">Toggle user menu</span>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className='w-64 bg-[#020202] text-white border-none'>
+                    <DropdownMenuLabel>{session?.user.name}</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className='p-2 hover:bg-[#1d1d1d]'>
+                        <Link href="/#" className='flex items-center'>
+                            <UserIcon />
+                            <span className='ml-2'>Account</span>
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className='p-2 hover:bg-[#1d1d1d]'>
+                        <Link href="/subscription" className='flex items-center'>
+                            <CreditCardIcon />
+                            <span className='ml-2'>Subscription</span>
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className='p-2 hover:bg-[#1d1d1d]'>
+                        <Link href="/#" className='flex items-center'>
+                            <Settings />
+                            <span className='ml-2'>Settings</span>
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => signOut()}>Logout</DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </header>
+    )
 }
 
 export default Navbar

@@ -32,6 +32,7 @@ export const authOptions: NextAuthOptions = {
                             isVerified: true,
                             subscriptionStatus: false,
                             totalListeningTimeInSeconds: 0,
+                            totalListeningTimeInSecondsWithoutAds: 0,
                         });
                         await existingUser.save();
                     }

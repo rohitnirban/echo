@@ -68,3 +68,49 @@
     @apply bg-background text-foreground;
   }
 }
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #020202;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gradient-animation-1 {
+  background: linear-gradient(-45deg, #64ee52, #3c3fe7, #23a6d5, #23d5ab);
+  background-size: 800% 800%;
+  animation: gradient-animation 15s ease infinite;
+  opacity: 0.25;
+  filter: blur(100px);
+}
+
+.gradient-animation-2 {
+  background: linear-gradient(-45deg, #53c644, #3234bc, #1c88af, #54bf16);
+  background-size: 800% 800%;
+  animation: gradient-animation 15s ease infinite;
+  opacity: 0.2;
+  filter: blur(100px);
+}

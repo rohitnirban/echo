@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import decodeHTMLEntities from "@/helpers/decodeHTMLEntities";
-import { useMediaPlayer } from "@/context/MediaPlayerContext";
+import { Song, useMediaPlayer } from "@/context/MediaPlayerContext";
 import getSongsSuggestions from "@/helpers/getSongsSuggestions";
 import { IconPlayerPlayFilled, IconPlayerTrackNextFilled, IconPlaylistAdd, IconShare } from '@tabler/icons-react';
 import { Library, MoreVertical } from "lucide-react";
@@ -36,7 +36,7 @@ export function AlbumArtwork({
   image,
   ...props
 }: AlbumArtworkProps) {
-  const { isPlaying, handlePlayPause, audioRef, setSongDetails, addToQueue } = useMediaPlayer();
+  const { isPlaying, handlePlayPause, audioRef, setSongDetails, addToQueue, addToQueueNext } = useMediaPlayer();
 
   const decodedAlbumName = decodeHTMLEntities(album.name);
   const { toast } = useToast();
@@ -78,6 +78,23 @@ export function AlbumArtwork({
 
   }
 
+  const handlePlayNext = () => {
+    if (!songUrl || !image) return null;
+
+    const song: Song = {
+      id: album.songID,
+      name: decodedAlbumName,
+      artists: { primary: [{ name: album.artist }] },
+      image: [{ url: image }],
+      downloadUrl: [{ url: songUrl }],
+    };
+
+    addToQueueNext(song);
+    toast({
+      title: 'Success',
+      description: `${decodedAlbumName} added to play next`
+    });
+  };
 
 
 
@@ -106,21 +123,21 @@ export function AlbumArtwork({
                   className="w-6 h-6 text-white cursor-pointer hover:bg-gray-800 hover:bg-opacity-50 rounded-full p-1"
                 />
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem>
+              <DropdownMenuContent className="bg-[#020202] text-white border-none">
+                <DropdownMenuItem className="hover:bg-[#1d1d1d]" onClick={handlePlayNext}>
                   <IconPlayerTrackNextFilled className="mr-2 h-4 w-4" />
                   <span>Play Next</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleAddToLibrary(album.songID)}>
+                <DropdownMenuItem className="hover:bg-[#1d1d1d]" onClick={() => handleAddToLibrary(album.songID)}>
                   <Library className="mr-2 h-4 w-4" />
                   <span>Add to Library</span>
                 </DropdownMenuItem>
 
-                <DropdownMenuItem>
+                <DropdownMenuItem className="hover:bg-[#1d1d1d]">
                   <IconPlaylistAdd className="mr-2 h-4 w-4" />
                   <span>Add to Playlist</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem className="hover:bg-[#1d1d1d]">
                   <IconShare className="mr-2 h-4 w-4" />
                   <span>Share</span>
                 </DropdownMenuItem>
@@ -130,7 +147,7 @@ export function AlbumArtwork({
         </div>
       </div>
       <div className="space-y-1 text-sm cursor-pointer select-none">
-        <h3 className="text-lg font-medium leading-none">{decodedAlbumName}</h3>
+        <h3 className="text-lg font-semibold leading-none">{decodedAlbumName}</h3>
         <p className="text-base text-muted-foreground">{album.artist.split(',')[0]}</p>
       </div>
     </div>

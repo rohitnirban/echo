@@ -53,7 +53,7 @@ export default function Queue() {
     }
 
     return (
-        <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-center max-w-7xl px-4 mx-auto py-6 bg-white h-[80vh]">
+        <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-center max-w-7xl px-4 mx-auto py-6 bg-[#020202] h-[80vh]">
             <div className="grid gap-4 md:gap-6 items-start">
                 <div className="grid gap-4 mx-auto">
                     <img
@@ -65,15 +65,15 @@ export default function Queue() {
                     />
                 </div>
                 <div className="flex justify-center items-center gap-7">
-                    <Library className="cursor-pointer" />
-                    <div className="bg-black p-2 rounded-full cursor-pointer">
-                        <IconPlayerPlayFilled className="h-14 w-14 text-white" />
+                    <Library className="cursor-pointer text-white" />
+                    <div className="bg-white p-2 rounded-full cursor-pointer">
+                        <IconPlayerPlayFilled className="h-14 w-14 text-black" />
                     </div>
-                    <IconHeart className="cursor-pointer" />
+                    <IconHeart className="cursor-pointer text-white" />
                 </div>
             </div>
-            <div className="queue section grid gap-4 md:gap-10 items-start">
-                <Card className="h-[70vh] flex flex-col"> {/* Set a fixed height and use flex */}
+            <div className="queue section grid gap-4 md:gap-10 items-start ">
+                <Card className="h-[70vh] flex flex-col bg-[#020202] text-white border-none"> {/* Set a fixed height and use flex */}
                     <CardHeader className="font-bold px-7">
                         Up Next
                     </CardHeader>
@@ -81,9 +81,9 @@ export default function Queue() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Song</TableHead>
-                                    <TableHead className="hidden sm:table-cell">Artist</TableHead>
-                                    <TableHead className="text-right">Duration</TableHead>
+                                    <TableHead className=" text-white">Song</TableHead>
+                                    <TableHead className="hidden sm:table-cell text-white">Artist</TableHead>
+                                    <TableHead className="text-right text-white">Duration</TableHead>
                                     <TableHead className="text-right">
                                         <MenuIcon className="w-5 h-5" />
                                     </TableHead>
@@ -126,12 +126,12 @@ export default function Queue() {
                         </Table>
                     </CardContent>
                     <CardFooter className="flex items-center justify-between mt-2">
-                        <Button size="sm" variant="outline">
-                            <ShuffleIcon className="w-4 h-4 mr-2" />
+                        <Button size="sm" variant="outline" className="text-black">
+                            <ShuffleIcon className="w-4 h-4 mr-2 text-black" />
                             Shuffle
                         </Button>
-                        <Button size="sm" variant="outline">
-                            <TrashIcon className="w-4 h-4 mr-2" />
+                        <Button size="sm" variant="outline" className="text-black">
+                            <TrashIcon className="w-4 h-4 mr-2 text-black" />
                             Clear Queue
                         </Button>
                     </CardFooter>

@@ -48,11 +48,11 @@ const fetchSongsFromSavaan = async (trendingSongs: string[]) => {
 
 
 const AlbumArtworkSkeleton = () => (
-  <div className="space-y-3">
-    <Skeleton className="h-[200px] w-[200px] rounded-md" />
+  <div className="space-y-3 w-full">
+    <Skeleton className="h-0 pb-[100%] w-full rounded-md bg-gray-700" />
     <div className="space-y-2">
-      <Skeleton className="h-4 w-[150px]" />
-      <Skeleton className="h-4 w-[100px]" />
+      <Skeleton className="h-4 w-[75%] bg-gray-700" />
+      <Skeleton className="h-4 w-[50%] bg-gray-700" />
     </div>
   </div>
 );
@@ -120,7 +120,7 @@ export default function Page() {
           <div>
             <h1 className='text-2xl font-bold tracking-tight'>Trending Right Now</h1>
             <p className='text-muted-foreground'>
-             Top 30 Songs which are currently pouplar, may change daily
+              Top 30 Songs which are currently pouplar, may change daily
             </p>
           </div>
           <div className="bg-black p-2 rounded-full">

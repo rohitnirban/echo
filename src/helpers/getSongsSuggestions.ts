@@ -1,13 +1,13 @@
 import axios from "axios";
 
 export default async function getSongsSuggestions(songID: string) {
-    console.log("fetched");
     try {
         const url = `https://saavn-api-sigma.vercel.app/api/songs/${songID}/suggestions`;
         const response = await axios.get(url);
 
         if (response.data.success === true) {
-            return response.data.data;
+            const data = response.data.data;
+            return data.slice(0, 15)
         } else {
             return null
         }

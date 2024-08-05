@@ -11,7 +11,7 @@ declare module "next-auth" {
         lastAdPlayedAt: Date | null;
         lastPlayedSongId: string | null;
     }
-    
+
     interface Session {
         user: User & DefaultSession['user']
     }

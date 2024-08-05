@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useMediaPlayer } from "@/context/MediaPlayerContext";
@@ -8,6 +8,7 @@ import { Volume, Volume2 } from "lucide-react";
 import decodeHTMLEntities from "@/helpers/decodeHTMLEntities";
 import Queue from "./queue";
 import { IconArrowBadgeDownFilled, IconArrowBadgeUpFilled } from "@tabler/icons-react";
+import axios from "axios";
 
 type MediaPlayerProps = {
     src: string; // MP4 music file URL
@@ -41,11 +42,11 @@ export default function MediaPlayer({ src, songTitle, artist, image }: MediaPlay
     };
 
     return (
-        <div className={`w-full bg-background p-4 rounded-lg shadow-md sticky left-0 bottom-0 z-[100000] ${songID ? "block" : "hidden"}`}>
-            <div className="mx-1 flex items-center justify-between">
+        <div className={`w-full p-4 sticky left-0 bottom-0 z-40 text-white bg-[#020202] ${songID ? "block" : "hidden"}`}>
+            <div className="mx-1 flex flex-col md:flex-row gap-4 md:gap-0 items-center justify-between">
                 <Slider
                     value={[(currentTime / duration) * 100]} // Calculate progress as a percentage
-                    className="absolute top-0 left-0 w-full h-1"
+                    className="absolute top-0 left-0 w-full h-[1px]"
                     onValueChange={handleSeek} // Handle seeking when slider value changes
                 />
                 <audio
@@ -55,34 +56,39 @@ export default function MediaPlayer({ src, songTitle, artist, image }: MediaPlay
                     onLoadedMetadata={handleDurationChange}
                     onEnded={handleSongEnd}
                 />
-                <div className="flex items-center gap-4">
-                    <Button size="icon" variant="ghost">
-                        <ChevronLeftIcon className="w-6 h-6" />
-                    </Button>
-                    <Button size="icon" variant={isPlaying ? "default" : "ghost"} onClick={handlePlayPause}>
-                        {isPlaying ? <PauseIcon className="w-6 h-6" /> : <PlayIcon className="w-6 h-6" />}
-                    </Button>
-                    <Button size="icon" variant="ghost" onClick={playNextSong}>
-                        <ChevronRightIcon className="w-6 h-6" />
-                    </Button>
-                    <div>
-                        <span>{formatTime(currentTime)}</span> / <span>{formatTime(duration)}</span>
+                <div className="hidden md:flex flex-col-reverse md:flex-row items-center gap-4">
+                    <div className="flex items-center">
+                        <ChevronLeftIcon className="cursor-pointer w-8 h-8 mx-2" />
+
+                        <div onClick={handlePlayPause}>
+                            {isPlaying ? <PauseIcon className="cursor-pointer w-8 h-8 mx-2" /> : <PlayIcon className="cursor-pointer w-8 h-8 mx-2" />}
+                        </div>
+
+                        <ChevronRightIcon className="cursor-pointer w-8 h-8 mx-2" onClick={playNextSong} />
+                    </div>
+                    <div className="flex justify-center items-center">
+                        <span className="mx-1">{formatTime(currentTime)}</span> / <span className="mx-1">{formatTime(duration)}</span>
                     </div>
                 </div>
                 {songImage ?
-                    <div className="flex text-center">
-                        <img src={songImage} alt="Img" className="rounded-xl mr-4" />
-                        <div className="flex-1 items-center">
-                            <h3 className="text-lg font-semibold">{decodeHTMLEntities(songName)}</h3>
-                            <p className="text-muted-foreground">{songArtist}</p>
+                    <div className="flex items-center justify-between md:justify-center w-full text-center">
+                        <div className="flex items-center">
+                            <img src={songImage} alt="Img" className="rounded-xl mr-4" />
+                            <div className="flex-1 items-center">
+                                <h3 className="text-lg font-semibold">{decodeHTMLEntities(songName)}</h3>
+                                <p className="text-muted-foreground">{songArtist}</p>
+                            </div>
                         </div>
+                        <Button className="flex md:hidden" size="icon" variant={"ghost"} onClick={toggleQueue}>
+                            {isQueueVisible ? <IconArrowBadgeDownFilled className="w-6 h-6" /> : <IconArrowBadgeUpFilled className="w-6 h-6" />}
+                        </Button>
                     </div>
                     :
                     <div>
                         Play Some Song
                     </div>
                 }
-                <div className="flex items-center gap-4">
+                <div className="hidden md:flex items-center gap-4">
                     <Button size="icon" variant={"ghost"}>
                         <ShuffleIcon className="w-6 h-6" />
                     </Button>
@@ -97,13 +103,8 @@ export default function MediaPlayer({ src, songTitle, artist, image }: MediaPlay
                     </Button>
                 </div>
             </div>
-            {/* {isQueueVisible && (
-                <div className="absolute mb-[5rem] bottom-0 left-0 -z-10 ">
-                    <Queue />
-                </div>
 
-            )} */}
-            <div className={`absolute mb-[5rem] bottom-0 left-0 -z-10 w-full overflow-auto transition-all duration-300 ease-in-out transform ${isQueueVisible ? 'translate-y-0' : 'translate-y-[100rem]'}`}>
+            <div className={`absolute mb-[5rem] bottom-0 left-0 -z-10  w-full overflow-auto transition-all duration-300 ease-in-out transform bg-[#020202] ${isQueueVisible ? 'translate-y-0' : 'translate-y-[100rem]'}`}>
                 <Queue />
             </div>
         </div>
@@ -140,7 +141,7 @@ function QueueIcon(props: React.SVGProps<SVGSVGElement>) {
 
 function ChevronLeftIcon(props: React.SVGProps<SVGSVGElement>) {
     return (
-        <svg {...props} viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false">
+        <svg {...props} fill="white" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false">
             <path d="M19,6L9,12l10,6V6L19,6z M7,6H5v12h2V6z"></path>
         </svg>
     );
@@ -148,7 +149,7 @@ function ChevronLeftIcon(props: React.SVGProps<SVGSVGElement>) {
 
 function ChevronRightIcon(props: React.SVGProps<SVGSVGElement>) {
     return (
-        <svg {...props} viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false">
+        <svg {...props} fill="white" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false">
             <path d="M5,18l10-6L5,6V18L5,18z M19,6h-2v12h2V6z"></path>
         </svg>
     );
@@ -162,7 +163,7 @@ function PauseIcon(props: React.SVGProps<SVGSVGElement>) {
             width="24"
             height="24"
             viewBox="0 0 24 24"
-            fill="none"
+            fill="white"
             stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
@@ -182,7 +183,7 @@ function PlayIcon(props: React.SVGProps<SVGSVGElement>) {
             width="24"
             height="24"
             viewBox="0 0 24 24"
-            fill="none"
+            fill="white"
             stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
