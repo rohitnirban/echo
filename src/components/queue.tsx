@@ -74,7 +74,7 @@ export default function Queue() {
             </div>
             <div className="queue section grid gap-4 md:gap-10 items-start ">
                 <Card className="h-[70vh] flex flex-col bg-[#020202] text-white border-none"> {/* Set a fixed height and use flex */}
-                    <CardHeader className="font-bold px-7">
+                    <CardHeader className="text-2xl font-bold px-7">
                         Up Next
                     </CardHeader>
                     <CardContent className="overflow-y-auto flex-grow"> {/* Add overflow-y-auto and flex-grow */}

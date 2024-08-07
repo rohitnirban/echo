@@ -31,8 +31,6 @@ export const authOptions: NextAuthOptions = {
                             username: email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, ''),
                             isVerified: true,
                             subscriptionStatus: false,
-                            totalListeningTimeInSeconds: 0,
-                            totalListeningTimeInSecondsWithoutAds: 0,
                         });
                         await existingUser.save();
                     }
@@ -43,7 +41,6 @@ export const authOptions: NextAuthOptions = {
                     user.image = existingUser.image as string;
                     user.subscriptionStatus = existingUser.subscriptionStatus;
                     user.lastAdPlayedAt = existingUser.lastAdPlayedAt;
-                    user.lastPlayedSongId = existingUser.lastPlayedSongId;
 
                     return true;
                 } catch (error) {
@@ -61,7 +58,6 @@ export const authOptions: NextAuthOptions = {
                 token.isVerified = user.isVerified;
                 token.subscriptionStatus = user.subscriptionStatus;
                 token.lastAdPlayedAt = user.lastAdPlayedAt;
-                token.lastPlayedSongId = user.lastPlayedSongId;
             }
             return token;
         },
@@ -73,7 +69,6 @@ export const authOptions: NextAuthOptions = {
                 session.user.isVerified = token.isVerified;
                 session.user.subscriptionStatus = token.subscriptionStatus;
                 session.user.lastAdPlayedAt = token.lastAdPlayedAt;
-                session.user.lastPlayedSongId = token.lastPlayedSongId;
             }
             return session;
         },

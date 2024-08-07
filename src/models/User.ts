@@ -1,9 +1,18 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, Schema, Types } from "mongoose";
 
+export interface SongHistory extends Document {
+    songId: string;
+    playedAt: Date;
+}
+
+const songHistorySchema = new Schema<SongHistory>({
+    songId: { type: String, required: true },
+    playedAt: { type: Date, required: true, default: Date.now },
+});
 
 export interface Subscription extends Document {
-    startDate: Date
-    endDate: Date
+    startDate: Date;
+    endDate: Date;
 }
 
 const subscriptionSchema = new Schema<Subscription>({
@@ -19,11 +28,9 @@ export interface User extends Document {
     isVerified: boolean;
     subscriptionStatus: boolean;
     subscriptionExpiry: Date;
-    totalListeningTimeInSeconds: number;
     lastAdPlayedAt: Date;
-    lastPlayedSongId: string;
     subscription: Subscription[];
-    recentSongs: string[];
+    songHistory: Types.DocumentArray<SongHistory>;
 }
 
 const userSchema: Schema<User> = new Schema(
@@ -31,16 +38,16 @@ const userSchema: Schema<User> = new Schema(
         name: {
             type: String,
             required: [true, "Name is required"],
-            min: [3, "Name should be atleast 3 charcters long"],
-            max: [30, "Name should be atmost 30 charcters long"],
+            min: [3, "Name should be at least 3 characters long"],
+            max: [30, "Name should be at most 30 characters long"],
             trim: true,
         },
         username: {
             type: String,
             required: [true, "Username is required"],
             unique: true,
-            min: [5, "Username should be atleast 5 charcters long"],
-            max: [20, "Username should be atmost 20 charcters long"],
+            min: [5, "Username should be at least 5 characters long"],
+            max: [20, "Username should be at most 20 characters long"],
             trim: true,
             match: [/^[a-zA-Z0-9_]+$/, "Please enter a valid username"],
         },
@@ -53,7 +60,6 @@ const userSchema: Schema<User> = new Schema(
         },
         image: {
             type: String,
-            required: [true, "Profile Image is required"],
         },
         isVerified: {
             type: Boolean,
@@ -66,28 +72,17 @@ const userSchema: Schema<User> = new Schema(
         subscriptionExpiry: {
             type: Date,
         },
-        totalListeningTimeInSeconds: {
-            type: Number,
-            default: 0
-        },
         lastAdPlayedAt: {
             type: Date,
         },
-        lastPlayedSongId: {
-            type: String
-        },
         subscription: [subscriptionSchema],
-        recentSongs:[
-            {
-                type:String,
-            }
-        ]
+        songHistory: [songHistorySchema],
     },
     {
         timestamps: true
     }
-)
+);
 
-const UserModel = (mongoose.models.User as mongoose.Model<User>) || (mongoose.model<User>("User", userSchema));
+const UserModel = (mongoose.models.User as mongoose.Model<User>) || mongoose.model<User>("User", userSchema);
 
 export default UserModel;

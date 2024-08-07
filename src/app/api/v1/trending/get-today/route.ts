@@ -4,11 +4,8 @@ import TrendingModel from '@/models/Trending';
 
 export async function GET(
     request: Request,
-    { params }: { params: { result: number } }
 ) {
     await dbConnect();
-
-    const maxResult = params.result;
 
     try {
         const todayStart = new Date(new Date().toISOString().split('T')[0]);
@@ -40,7 +37,7 @@ export async function GET(
                     chart: 'mostPopular',
                     regionCode: 'IN',
                     videoCategoryId: '10',
-                    maxResults: maxResult < 30 ? '30' : maxResult,
+                    maxResults: 30,
                     key: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY
                 }
             });

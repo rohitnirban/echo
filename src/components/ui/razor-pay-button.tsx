@@ -59,7 +59,7 @@ export default function RazorpayButton() {
                     address: "Razorpay Corporate Office"
                 },
                 theme: {
-                    color: "#11ff00"
+                    color: "#020202"
                 }
             };
 

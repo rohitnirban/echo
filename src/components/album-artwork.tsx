@@ -147,8 +147,8 @@ export function AlbumArtwork({
         </div>
       </div>
       <div className="space-y-1 text-sm cursor-pointer select-none">
-        <h3 className="text-lg font-semibold leading-none">{decodedAlbumName}</h3>
-        <p className="text-base text-muted-foreground">{album.artist.split(',')[0]}</p>
+        <h3 className="text-base md:text-lg font-semibold leading-none">{decodedAlbumName}</h3>
+        <p className="text-xs md:text-base text-muted-foreground">{album.artist.split(',')[0]}</p>
       </div>
     </div>
   );

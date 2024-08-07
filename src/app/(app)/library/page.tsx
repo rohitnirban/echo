@@ -10,6 +10,7 @@ import { useMemo } from 'react';
 import { Separator } from "@/components/ui/separator";
 import { Play } from "lucide-react";
 import { IconPlayerPlayFilled } from "@tabler/icons-react";
+import { useSession } from "next-auth/react";
 
 interface SongData {
   id: string;
@@ -46,6 +47,8 @@ const AlbumArtworkSkeleton = () => (
 
 export default function Page() {
 
+  const { data: session } = useSession();
+
   const { songID, isPlaying, addToQueue } = useMediaPlayer();
 
   const { data: librarySongs = [], isLoading: isLibraryLoading } = useQuery(
@@ -64,7 +67,6 @@ export default function Page() {
       refetchOnReconnect: true,
     }
   );
-  // TODO : fix the cache problem for library
 
   const skeletons = useMemo(() =>
     Array.from({ length: 10 }).map((_, index) => (
@@ -100,8 +102,8 @@ export default function Page() {
 
   const NoSongsMessage = () => (
     <div className="flex flex-col items-center justify-center h-64">
-      <p className="text-xl font-semibold mb-2">No songs in your library</p>
-      <p className="text-muted-foreground">Please add some songs to your library</p>
+      <p className="text-xl font-semibold mb-2">No saved song found</p>
+      <p className="text-muted-foreground">Please add some songs to your saved song</p>
     </div>
   );
 
@@ -110,17 +112,22 @@ export default function Page() {
       <main className="flex-1 space-y-4 p-4 pt-6 md:p-8">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className='text-2xl font-bold tracking-tight'>Library</h1>
+            <h1 className='text-2xl font-bold tracking-tight'>Saved</h1>
             <p className='text-muted-foreground'>
               All your saved songs at one place
             </p>
           </div>
-          <div className="bg-black p-2 rounded-full">
-            <IconPlayerPlayFilled className="text-white" />
+          <div className="bg-[#6cf61d] p-2 rounded-full">
+            <IconPlayerPlayFilled className="text-black" />
           </div>
         </div>
         <Separator className='my-4 shadow' />
-        {isLibraryLoading ? (
+        {session === null ? (
+          <div className="flex flex-col items-center justify-center h-64">
+            <p className="text-xl font-semibold mb-2">No saved song found</p>
+            <p className="text-muted-foreground">Login to save songs</p>
+          </div>
+        ) : isLibraryLoading ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {skeletons}
           </div>

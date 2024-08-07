@@ -9,6 +9,7 @@ import decodeHTMLEntities from "@/helpers/decodeHTMLEntities";
 import Queue from "./queue";
 import { IconArrowBadgeDownFilled, IconArrowBadgeUpFilled } from "@tabler/icons-react";
 import axios from "axios";
+import { addSongToHistory } from "@/helpers/addSongToHistory";
 
 type MediaPlayerProps = {
     src: string; // MP4 music file URL
@@ -22,6 +23,14 @@ export default function MediaPlayer({ src, songTitle, artist, image }: MediaPlay
 
     const [isMuted, setIsMuted] = useState(false);
     const [isQueueVisible, setIsQueueVisible] = useState(false);
+
+    useEffect(() => {
+        if (isPlaying) {
+            addSongToHistory(songID)
+                .then(() => console.log('Song added to history'))
+                .catch((error) => console.error('Failed to add song to history:', error));
+        }
+    }, [isPlaying, songID]);
 
     const handleMuteToggle = () => {
         if (audioRef.current) {

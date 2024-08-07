@@ -24,7 +24,7 @@ interface Artist {
 }
 
 const fetchTrendingSongs = async () => {
-  const response = await axios.get('/api/v1/trending/get-today/30');
+  const response = await axios.get('/api/v1/trending/get-today');
   return response.data.titles;
 };
 
@@ -43,7 +43,7 @@ const fetchSongsFromSavaan = async (trendingSongs: string[]) => {
     return [];
   });
 
-  return allSongs.slice(0, 30)
+  return allSongs.slice(0, 25)
 };
 
 
@@ -120,11 +120,11 @@ export default function Page() {
           <div>
             <h1 className='text-2xl font-bold tracking-tight'>Trending Right Now</h1>
             <p className='text-muted-foreground'>
-              Top 30 Songs which are currently pouplar, may change daily
+              Top Songs which are currently pouplar, may change daily
             </p>
           </div>
-          <div className="bg-black p-2 rounded-full">
-            <IconPlayerPlayFilled className="text-white" />
+          <div className="bg-[#6cf61d] p-2 rounded-full">
+            <IconPlayerPlayFilled className="text-black" />
           </div>
         </div>
         <Separator className='my-4 shadow' />

@@ -9,17 +9,15 @@ export const config = {
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request, secret: process.env.NEXT_AUTH_SECRET });
 
-  console.log(token);
-
   const url = request.nextUrl;
 
-  if (token && url.pathname === '/') {
+  if (url.pathname === '/') {
     return NextResponse.redirect(new URL('/music', request.url));
   }
 
-  if (!token && (url.pathname.startsWith('/music') || url.pathname.startsWith('/trending') || url.pathname.startsWith('/library'))) {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
+  // if (!token && (url.pathname.startsWith('/music') || url.pathname.startsWith('/trending') || url.pathname.startsWith('/library'))) {
+  //   return NextResponse.redirect(new URL('/', request.url));
+  // }
 
   return NextResponse.next();
 }

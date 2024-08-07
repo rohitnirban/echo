@@ -1,182 +1,11 @@
-// 'use client'
-
-// import React, { createContext, useContext, useRef, useState } from "react";
-// import { addSongsToQueue } from "@/helpers/queueUtils"; // import the utility function
-// import getSongsSuggestions from "@/helpers/getSongsSuggestions";
-
-// export interface Song {
-//   id: string;
-//   name: string;
-//   artists: { primary: { name: string }[] };
-//   image: { url: string }[];
-//   downloadUrl: { url: string }[];
-//   duration?: number;
-// }
-
-// interface MediaPlayerContextType {
-//   isPlaying: boolean;
-//   songID: string;
-//   songName: string;
-//   songArtist: string;
-//   songImage: string;
-//   songImageHigh: string;
-//   currentTime: number;
-//   duration: number;
-//   audioRef: React.MutableRefObject<HTMLAudioElement | null>;
-//   handlePlayPause: () => void;
-//   handleTimeUpdate: () => void;
-//   handleDurationChange: () => void;
-//   handleSongEnd: () => void;
-//   setSongDetails: (id: string, name: string, artist: string, image: string, imageHigh: string) => void;
-//   setSongTime: (currentTime: number, duration: number) => void;
-//   setQueue: (queue: Song[]) => void;
-//   addToQueue: (songs: Song[]) => void;
-//   addToQueueNext: (song: Song) => void;
-//   playNextSong: () => void;
-//   queue: Song[];
-// }
-
-// const MediaPlayerContext = createContext<MediaPlayerContextType | undefined>(undefined);
-
-// export const MediaPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-//   const [isPlaying, setIsPlaying] = useState(false);
-//   const [songID, setSongID] = useState("");
-//   const [songName, setSongName] = useState("");
-//   const [songArtist, setSongArtist] = useState("");
-//   const [songImage, setSongImage] = useState("");
-//   const [songImageHigh, setSongImageHigh] = useState("");
-//   const [currentTime, setCurrentTime] = useState(0);
-//   const [duration, setDuration] = useState(0);
-//   const [queue, setQueueState] = useState<Song[]>([]);
-//   const audioRef = useRef<HTMLAudioElement | null>(null);
-
-//   const handlePlayPause = () => {
-//     if (audioRef.current) {
-//       if (isPlaying) {
-//         audioRef.current.pause();
-//       } else {
-//         audioRef.current.play().catch(error => console.error("Error playing audio:", error));
-//       }
-//       setIsPlaying(!isPlaying);
-//     }
-//   };
-
-
-//   const handleTimeUpdate = () => {
-//     if (audioRef.current) {
-//       setCurrentTime(audioRef.current.currentTime);
-//     }
-//   };
-
-//   const handleDurationChange = () => {
-//     if (audioRef.current) {
-//       setDuration(audioRef.current.duration);
-//     }
-//   };
-
-//   const handleSongEnd = () => {
-//     playNextSong();
-//   };
-
-//   const setSongDetails = (id: string, name: string, artist: string, image: string, imageHigh: string) => {
-//     setSongID(id);
-//     setSongName(name);
-//     setSongArtist(artist);
-//     setSongImage(image);
-//     setSongImageHigh(imageHigh);
-//   };
-
-//   const setSongTime = (currentTime: number, duration: number) => {
-//     setCurrentTime(currentTime);
-//     setDuration(duration);
-//   };
-
-//   const setQueue = (queue: Song[]) => {
-//     setQueueState(queue);
-//   };
-
-//   const addToQueue = async (songs: Song[]) => {
-//     console.log("Songs ", songs);
-//     const suggestionSongs = await Promise.all(
-//       songs.map(async (song) => {
-//         const suggestions = await getSongsSuggestions(song.id);
-//         return suggestions ? suggestions : [];
-//       })
-//     );
-
-//     const flattenedSuggestions = suggestionSongs.flat();
-
-//     if (flattenedSuggestions.length > 0) {
-//       setQueueState((prevQueue) => addSongsToQueue(prevQueue, flattenedSuggestions));
-//     }
-//   };
-
-//   const addToQueueNext = (song: Song) => {
-//     setQueueState((prevQueue) => [song, ...prevQueue]);
-//   };
-
-//   const playNextSong = () => {
-//     if (queue.length > 0) {
-//       const nextSong = queue.shift();
-//       setQueueState([...queue]); // Update the queue after removing the first song
-//       if (nextSong) {
-//         console.log(nextSong);
-//         setSongDetails(nextSong.id, nextSong.name, nextSong.artists.primary[0].name, nextSong.image[0].url, nextSong.image[2].url);
-//         if (audioRef.current) {
-//           audioRef.current.src = nextSong.downloadUrl[4].url;
-//           audioRef.current.play();
-//         }
-//         setIsPlaying(true);
-//       }
-//     }
-//   };
-
-
-
-//   return (
-//     <MediaPlayerContext.Provider
-//       value={{
-//         isPlaying,
-//         songID,
-//         songName,
-//         songArtist,
-//         songImage,
-//         songImageHigh,
-//         currentTime,
-//         duration,
-//         audioRef,
-//         handlePlayPause,
-//         handleTimeUpdate,
-//         handleDurationChange,
-//         handleSongEnd,
-//         setSongDetails,
-//         setSongTime,
-//         setQueue,
-//         addToQueue,
-//         addToQueueNext,
-//         playNextSong,
-//         queue,
-//       }}
-//     >
-//       {children}
-//     </MediaPlayerContext.Provider>
-//   );
-// };
-
-// export const useMediaPlayer = () => {
-//   const context = useContext(MediaPlayerContext);
-//   if (!context) {
-//     throw new Error("useMediaPlayer must be used within a MediaPlayerProvider");
-//   }
-//   return context;
-// };
-
-
 'use client'
 
 import React, { createContext, useContext, useRef, useState } from "react";
 import { addSongsToQueue } from "@/helpers/queueUtils";
 import getSongsSuggestions from "@/helpers/getSongsSuggestions";
+import { Notifications } from 'react-push-notification';
+import addNotification from 'react-push-notification';
+
 
 export interface Song {
   id: string;
@@ -228,12 +57,15 @@ export const MediaPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
+        sendNotification('Paused', `${songName} by ${songArtist}`);
       } else {
         audioRef.current.play().catch(error => console.error("Error playing audio:", error));
+        sendNotification('Now Playing', `${songName} by ${songArtist}`);
       }
       setIsPlaying(!isPlaying);
     }
   };
+  
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
@@ -300,9 +132,22 @@ export const MediaPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
           audioRef.current.play();
         }
         setIsPlaying(true);
+        sendNotification('Now Playing', `${nextSong.name} by ${nextSong.artists.primary[0].name}`);
       }
     }
   };
+  
+
+  const sendNotification = (title: string, message: string) => {
+    addNotification({
+      title: title,
+      message: message,
+      duration: 4000,
+      icon: songImage,
+      native: true
+    });
+  };
+  
 
   return (
     <MediaPlayerContext.Provider
