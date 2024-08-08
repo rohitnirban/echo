@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { HeartIcon, Library, MenuIcon, MoveVerticalIcon, PauseIcon, PlayIcon, ShuffleIcon, TrashIcon } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { IconHeart, IconHeartFilled, IconPlayerPlayFilled } from "@tabler/icons-react";
+import { formatTimeDuration } from "@/helpers/formatTimeDuration";
 
 
 interface Song {
@@ -24,7 +25,7 @@ interface Song {
 
 export default function Queue() {
 
-    const { songID, songName, songArtist, songImageHigh, duration, queue, isPlaying, handlePlayPause, audioRef, setSongDetails, addToQueue } = useMediaPlayer();
+    const { songID, songName, songArtist, songImageHigh, duration, queue, isPlaying, handlePlayPause, audioRef, setSongDetails, addToQueue, clearQueue } = useMediaPlayer();
 
     const handlePlay = async (song: Song) => {
         console.log(song);
@@ -33,7 +34,9 @@ export default function Queue() {
 
             await audioRef.current.pause(); // Pause any currently playing song
 
-            audioRef.current.src = song.downloadUrl[4].url; // Set the new song URL
+            audioRef.current.src = song.downloadUrl[0].url; // Set the new song URL
+
+            // await audioRef.current.play();
 
             const decodedAlbumName = decodeHTMLEntities(song.name);
             setSongDetails(song.id, decodedAlbumName, song.artists.primary[0].name, song.image[0].url, song.image[2].url);
@@ -45,12 +48,9 @@ export default function Queue() {
         }
     };
 
-    function formatTime(seconds: number): string {
-        const format = (val: number) => `0${Math.floor(val)}`.slice(-2);
-        const minutes = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${format(minutes)}:${format(secs)}`;
-    }
+    const handleClearQueue = () => {
+        clearQueue();
+    };
 
     return (
         <div className="grid md:grid-cols-2 gap-6 lg:gap-12 items-center max-w-7xl px-4 mx-auto py-6 bg-[#020202] h-[80vh]">
@@ -84,9 +84,6 @@ export default function Queue() {
                                     <TableHead className=" text-white">Song</TableHead>
                                     <TableHead className="hidden sm:table-cell text-white">Artist</TableHead>
                                     <TableHead className="text-right text-white">Duration</TableHead>
-                                    <TableHead className="text-right">
-                                        <MenuIcon className="w-5 h-5" />
-                                    </TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -98,27 +95,12 @@ export default function Queue() {
                                     queue.map((song) => (
                                         <TableRow key={song.id} >
                                             <TableCell>
-                                                <div className="font-medium" onClick={() => handlePlay(song)}>{decodeHTMLEntities(song.name)}</div>
+                                                <div className="font-medium cursor-pointer" onClick={() => handlePlay(song)}>{decodeHTMLEntities(song.name)}</div>
                                             </TableCell>
                                             <TableCell className="hidden sm:table-cell">
-                                                <div className="text-muted-foreground">{song.artists.primary[0]?.name}</div>
+                                                <div className="text-gray-300">{song.artists.primary[0]?.name}</div>
                                             </TableCell>
-                                            <TableCell className="text-right">{formatTime(song.duration || 0)}</TableCell>
-                                            <TableCell className="text-right">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button size="icon" variant="ghost" className="w-6 h-6">
-                                                            <MoveVerticalIcon className="w-5 h-5" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem>Move Up</DropdownMenuItem>
-                                                        <DropdownMenuItem>Move Down</DropdownMenuItem>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuItem>Remove</DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </TableCell>
+                                            <TableCell className="text-right">{formatTimeDuration(song.duration || 0)}</TableCell>
                                         </TableRow>
                                     ))
                                 )}
@@ -126,11 +108,11 @@ export default function Queue() {
                         </Table>
                     </CardContent>
                     <CardFooter className="flex items-center justify-between mt-2">
-                        <Button size="sm" variant="outline" className="text-black">
+                        {/* <Button size="sm" variant="outline" className="text-black">
                             <ShuffleIcon className="w-4 h-4 mr-2 text-black" />
                             Shuffle
-                        </Button>
-                        <Button size="sm" variant="outline" className="text-black">
+                        </Button> */}
+                        <Button size="sm" variant="outline" className="text-black" onClick={handleClearQueue}>
                             <TrashIcon className="w-4 h-4 mr-2 text-black" />
                             Clear Queue
                         </Button>

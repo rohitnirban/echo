@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { CompassIcon, FlameIcon, HomeIcon, LibraryIcon, Music2Icon, XIcon } from "lucide-react"
+import { CompassIcon, FlameIcon, HeartIcon, HomeIcon, LibraryIcon, Music2Icon, XIcon } from "lucide-react"
 import { Button } from "./ui/button"
 import { Separator } from "./ui/separator";
 import Image from "next/image";
@@ -99,6 +99,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <span>Saved</span>
         </Link>
         <Link
+          href="/favourite"
+          className="flex items-center gap-3 rounded-md px-3 py-2 transition-colors hover:bg-[#1d1d1d] hover:text-white font-semibold"
+          prefetch={false}
+        >
+          <HeartIcon className="h-5 w-5" />
+          <span>Favourite</span>
+        </Link>
+        <Link
           href="#"
           className="flex items-center gap-3 rounded-md px-3 py-2 transition-colors hover:bg-[#1d1d1d] hover:text-white font-semibold"
           prefetch={false}
@@ -112,7 +120,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <div className="space-y-2">
             <div className="px-3 text-xs font-medium text-muted-foreground">Recently Played</div>
             <div className="space-y-2 p-2">
-              {history.slice(0, 5)?.map((song, index) => {
+              {history.slice(0, 3)?.map((song, index) => {
                 return (
                   <Link
                     href="#"

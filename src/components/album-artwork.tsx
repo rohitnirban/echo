@@ -4,7 +4,7 @@ import decodeHTMLEntities from "@/helpers/decodeHTMLEntities";
 import { Song, useMediaPlayer } from "@/context/MediaPlayerContext";
 import getSongsSuggestions from "@/helpers/getSongsSuggestions";
 import { IconPlayerPlayFilled, IconPlayerTrackNextFilled, IconPlaylistAdd, IconShare } from '@tabler/icons-react';
-import { Library, MoreVertical } from "lucide-react";
+import { HeartIcon, Library, MoreVertical } from "lucide-react";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "./ui/context-menu";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Dropdown } from "react-day-picker";
@@ -75,7 +75,23 @@ export function AlbumArtwork({
         variant: "destructive"
       })
     }
+  }
 
+  const handleAddToFavourite = async (songID: string) => {
+    try {
+      const response = await axios.post(`/api/v1/favourite/add-song/${songID}`);
+      toast({
+        title: 'Success',
+        description: response.data.message
+      })
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiResponse>;
+      toast({
+        title: "Error",
+        description: axiosError.response?.data.message || "Failed to add song to favourite",
+        variant: "destructive"
+      })
+    }
   }
 
   const handlePlayNext = () => {
@@ -133,9 +149,9 @@ export function AlbumArtwork({
                   <span>Add to Library</span>
                 </DropdownMenuItem>
 
-                <DropdownMenuItem className="hover:bg-[#1d1d1d]">
-                  <IconPlaylistAdd className="mr-2 h-4 w-4" />
-                  <span>Add to Playlist</span>
+                <DropdownMenuItem className="hover:bg-[#1d1d1d]" onClick={() => handleAddToFavourite(album.songID)}>
+                  <HeartIcon className="mr-2 h-4 w-4" />
+                  <span>Add to Favourite</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="hover:bg-[#1d1d1d]">
                   <IconShare className="mr-2 h-4 w-4" />

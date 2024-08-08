@@ -1,11 +1,9 @@
 'use client'
 
-import React, { createContext, useContext, useRef, useState } from "react";
+import React, { createContext, useCallback, useContext, useRef, useState, useEffect } from "react";
 import { addSongsToQueue } from "@/helpers/queueUtils";
 import getSongsSuggestions from "@/helpers/getSongsSuggestions";
-import { Notifications } from 'react-push-notification';
 import addNotification from 'react-push-notification';
-
 
 export interface Song {
   id: string;
@@ -18,6 +16,7 @@ export interface Song {
 
 interface MediaPlayerContextType {
   isPlaying: boolean;
+  setIsPlayingState: (value: boolean) => void;
   songID: string;
   songName: string;
   songArtist: string;
@@ -25,7 +24,7 @@ interface MediaPlayerContextType {
   songImageHigh: string;
   currentTime: number;
   duration: number;
-  audioRef: React.MutableRefObject<HTMLAudioElement | null>;
+  audioRef: React.RefObject<HTMLAudioElement>;
   handlePlayPause: () => void;
   handleTimeUpdate: () => void;
   handleDurationChange: () => void;
@@ -33,15 +32,22 @@ interface MediaPlayerContextType {
   setSongDetails: (id: string, name: string, artist: string, image: string, imageHigh: string) => void;
   setSongTime: (currentTime: number, duration: number) => void;
   setQueue: (queue: Song[]) => void;
-  addToQueue: (songs: Song[]) => void;
+  addToQueue: (songs: Song[]) => Promise<void>;
   addToQueueNext: (song: Song) => void;
   playNextSong: () => void;
+  playPrevSong: () => void;
+  clearQueue: () => void;
+  playHistory: Song[];
   queue: Song[];
 }
 
 const MediaPlayerContext = createContext<MediaPlayerContextType | undefined>(undefined);
 
+
 export const MediaPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+
+  const [isLoading, setIsLoading] = useState(false);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [songID, setSongID] = useState("");
   const [songName, setSongName] = useState("");
@@ -51,129 +57,217 @@ export const MediaPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [queue, setQueueState] = useState<Song[]>([]);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [playHistory, setPlayHistory] = useState<Song[]>([]);
 
-  const handlePlayPause = () => {
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.addEventListener('timeupdate', handleTimeUpdate);
+      audio.addEventListener('durationchange', handleDurationChange);
+      audio.addEventListener('ended', handleSongEnd);
+
+      return () => {
+        audio.removeEventListener('timeupdate', handleTimeUpdate);
+        audio.removeEventListener('durationchange', handleDurationChange);
+        audio.removeEventListener('ended', handleSongEnd);
+      };
+    }
+  }, []);
+
+  const setIsPlayingState = (value: boolean) => {
+    setIsPlaying(value);
+  }
+
+  const handlePlayPause = useCallback(() => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
-        sendNotification('Paused', `${songName} by ${songArtist}`);
       } else {
         audioRef.current.play().catch(error => console.error("Error playing audio:", error));
-        sendNotification('Now Playing', `${songName} by ${songArtist}`);
       }
-      setIsPlaying(!isPlaying);
+      setIsPlaying(prev => !prev);
     }
-  };
-  
+  }, [isPlaying]);
 
-  const handleTimeUpdate = () => {
+  const handleTimeUpdate = useCallback(() => {
     if (audioRef.current) {
       setCurrentTime(audioRef.current.currentTime);
     }
-  };
+  }, []);
 
-  const handleDurationChange = () => {
+  const handleDurationChange = useCallback(() => {
     if (audioRef.current) {
       setDuration(audioRef.current.duration);
     }
-  };
+  }, []);
 
-  const handleSongEnd = () => {
+  const handleSongEnd = useCallback(() => {
     playNextSong();
-  };
+  }, []);
 
-  const setSongDetails = (id: string, name: string, artist: string, image: string, imageHigh: string) => {
+  const setSongDetails = useCallback((id: string, name: string, artist: string, image: string, imageHigh: string) => {
     setSongID(id);
     setSongName(name);
     setSongArtist(artist);
     setSongImage(image);
     setSongImageHigh(imageHigh);
-  };
+  }, []);
 
-  const setSongTime = (currentTime: number, duration: number) => {
+  const setSongTime = useCallback((currentTime: number, duration: number) => {
     setCurrentTime(currentTime);
     setDuration(duration);
-  };
+  }, []);
 
-  const setQueue = (queue: Song[]) => {
-    setQueueState(queue);
-  };
+  const setQueue = useCallback((newQueue: Song[]) => {
+    setQueueState(newQueue);
+  }, []);
 
-  const addToQueue = async (songs: Song[]) => {
-    console.log("Songs ", songs);
-    const suggestionSongs = await Promise.all(
-      songs.map(async (song) => {
-        const suggestions = await getSongsSuggestions(song.id);
-        return suggestions ? suggestions : [];
-      })
-    );
+  const addToQueue = useCallback(async (songs: Song[]) => {
+    try {
+      const suggestionSongs = await Promise.all(
+        songs.map(song => getSongsSuggestions(song.id))
+      );
 
-    const flattenedSuggestions = suggestionSongs.flat();
+      const flattenedSuggestions = suggestionSongs.flat().filter(Boolean);
 
-    if (flattenedSuggestions.length > 0) {
-      setQueueState((prevQueue) => addSongsToQueue(prevQueue, flattenedSuggestions));
+      if (flattenedSuggestions.length > 0) {
+        setQueueState(prevQueue => addSongsToQueue(prevQueue, flattenedSuggestions));
+      }
+    } catch (error) {
+      console.error("Error adding songs to queue:", error);
+      addNotification({
+        title: 'Error',
+        message: 'Failed to add songs to queue',
+        theme: 'red',
+        duration: 3000,
+      });
     }
-  };
+  }, []);
 
-  const addToQueueNext = (song: Song) => {
-    setQueueState((prevQueue) => [song, ...prevQueue]);
-  };
+  const addToQueueNext = useCallback((song: Song) => {
+    setQueueState(prevQueue => [song, ...prevQueue]);
+  }, []);
 
-  const playNextSong = () => {
+  const playNextSong = useCallback(() => {
     if (queue.length > 0) {
-      const nextSong = queue.shift();
-      setQueueState([...queue]);
+      const currentSong: Song = {
+        id: songID,
+        name: songName,
+        artists: { primary: [{ name: songArtist }] },
+        image: [{ url: songImage }, { url: songImageHigh }],
+        downloadUrl: [{ url: audioRef.current?.src || '' }],
+      };
+      setPlayHistory(prevHistory => [currentSong, ...prevHistory]);
+
+      const [nextSong, ...remainingQueue] = queue;
+      setQueueState(remainingQueue);
       if (nextSong) {
-        console.log(nextSong);
-        setSongDetails(nextSong.id, nextSong.name, nextSong.artists.primary[0].name, nextSong.image[0].url, nextSong.image[2].url);
+        setSongDetails(
+          nextSong.id,
+          nextSong.name,
+          nextSong.artists?.primary?.[0]?.name || 'Unknown Artist',
+          nextSong.image?.[0]?.url || '',
+          nextSong.image?.[2]?.url || nextSong.image?.[0]?.url || ''
+        );
+        setIsPlaying(true)
         if (audioRef.current) {
-          audioRef.current.src = nextSong.downloadUrl[4].url;
-          audioRef.current.play();
+          audioRef.current.src = nextSong.downloadUrl?.[4]?.url;
+          audioRef.current.play().catch(error => console.error("Error playing next song:", error));
+        }
+      }
+
+    }
+  }, [queue, songID, songName, songArtist, songImage, songImageHigh, setSongDetails]);
+
+  const playPrevSong = useCallback(() => {
+    if (playHistory.length > 0) {
+      const [prevSong, ...remainingHistory] = playHistory;
+      setPlayHistory(remainingHistory);
+
+      if (prevSong) {
+        setIsLoading(true);  // Set loading state to true
+
+        const currentSong: Song = {
+          id: songID,
+          name: songName,
+          artists: { primary: [{ name: songArtist }] },
+          image: [{ url: songImage }, { url: songImageHigh }],
+          downloadUrl: [{ url: audioRef.current?.src || '' }],
+          duration: duration
+        };
+        setQueueState(prevQueue => [currentSong, ...prevQueue]);
+
+        setSongDetails(
+          prevSong.id,
+          prevSong.name,
+          prevSong.artists?.primary?.[0]?.name || 'Unknown Artist',
+          prevSong.image?.[0]?.url || '',
+          prevSong.image?.[1]?.url || ''
+        );
+
+        if (audioRef.current) {
+          console.log(prevSong);
+          audioRef.current.src = prevSong.downloadUrl[0].url;
+          audioRef.current.play()
+            .then(() => {
+              setDuration(audioRef.current!.duration);
+              setIsLoading(false);  // Set loading state to false when song starts playing
+            })
+            .catch(error => {
+              console.error("Error playing previous song:", error);
+              setIsLoading(false);  // Set loading state to false if there's an error
+            });
         }
         setIsPlaying(true);
-        sendNotification('Now Playing', `${nextSong.name} by ${nextSong.artists.primary[0].name}`);
       }
+    } else if (audioRef.current) {
+      setIsLoading(true);  // Set loading state to true
+      audioRef.current.currentTime = 0;
+      audioRef.current.play()
+        .then(() => setIsLoading(false))  // Set loading state to false when song starts playing
+        .catch(error => {
+          console.error("Error restarting current song:", error);
+          setIsLoading(false);  // Set loading state to false if there's an error
+        });
     }
-  };
-  
+  }, [playHistory, songID, songName, songArtist, songImage, songImageHigh, duration, setSongDetails]);
 
-  const sendNotification = (title: string, message: string) => {
-    addNotification({
-      title: title,
-      message: message,
-      duration: 4000,
-      icon: songImage,
-      native: true
-    });
+
+  const clearQueue = useCallback(() => {
+    setQueueState([]);
+  }, []);
+
+  const contextValue = {
+    isPlaying,
+    setIsPlayingState,
+    songID,
+    songName,
+    songArtist,
+    songImage,
+    songImageHigh,
+    currentTime,
+    duration,
+    audioRef,
+    handlePlayPause,
+    handleTimeUpdate,
+    handleDurationChange,
+    handleSongEnd,
+    setSongDetails,
+    setSongTime,
+    setQueue,
+    addToQueue,
+    addToQueueNext,
+    playNextSong,
+    playPrevSong,
+    playHistory,
+    clearQueue,
+    queue,
+    isLoading,
   };
-  
 
   return (
-    <MediaPlayerContext.Provider
-      value={{
-        isPlaying,
-        songID,
-        songName,
-        songArtist,
-        songImage,
-        songImageHigh,
-        currentTime,
-        duration,
-        audioRef,
-        handlePlayPause,
-        handleTimeUpdate,
-        handleDurationChange,
-        handleSongEnd,
-        setSongDetails,
-        setSongTime,
-        setQueue,
-        addToQueue,
-        addToQueueNext,
-        playNextSong,
-        queue,
-      }}
-    >
+    <MediaPlayerContext.Provider value={contextValue}>
       {children}
     </MediaPlayerContext.Provider>
   );

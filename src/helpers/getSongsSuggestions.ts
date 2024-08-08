@@ -7,7 +7,7 @@ export default async function getSongsSuggestions(songID: string) {
 
         if (response.data.success === true) {
             const data = response.data.data;
-            return data.slice(0, 15)
+            return data.slice(0, 10)
         } else {
             return null
         }

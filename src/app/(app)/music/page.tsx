@@ -326,7 +326,7 @@ const fetchLatestSongsFromSavaan = async () => {
 
 const fetchTopSongsFromSavaan = async () => {
   const response = await axios.get(
-    'https://saavn-api-sigma.vercel.app/api/search/songs?query=sumit goswami'
+    'https://saavn-api-sigma.vercel.app/api/search/songs?query=work out'
   );
 
   const data = response.data.data.results;
@@ -408,7 +408,7 @@ export default function MusicPage() {
                           <AlbumArtwork
                             album={{
                               songID: song.id,
-                              cover: song.image[1]?.url,
+                              cover: song.image[2]?.url,
                               name: song.name,
                               artist: song.artists.primary.map((artist) => artist.name).join(", ")
                             }}
