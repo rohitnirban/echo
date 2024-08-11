@@ -5,7 +5,6 @@ import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/sidebar';
 import { useEffect, useState } from 'react';
 import MediaPlayer from '@/components/media-player';
-import { Notifications } from 'react-push-notification';
 import { useMediaPlayer } from '@/context/MediaPlayerContext';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -13,7 +12,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <ClientProviders>
-      <Notifications />
       <div className="flex h-screen">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <div className="flex flex-col flex-1 overflow-hidden">
