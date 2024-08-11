@@ -2,7 +2,7 @@
 
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { AlbumArtwork } from "@/components/album-artwork";
-import { useMediaPlayer } from "@/context/MediaPlayerContext";
+import { Song, useMediaPlayer } from "@/context/MediaPlayerContext";
 import { useQuery } from 'react-query';
 import axios from 'axios';
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,14 +12,6 @@ import { Play } from "lucide-react";
 import { IconPlayerPlayFilled } from "@tabler/icons-react";
 import { useSession } from "next-auth/react";
 
-interface SongData {
-  id: string;
-  name: string;
-  year: string;
-  artists: { primary: Artist[] };
-  image: { url: string }[];
-  downloadUrl: { url: string }[];
-}
 
 interface Artist {
   name: string;
@@ -78,7 +70,7 @@ export default function Page() {
   );
 
   const songItems = useMemo(() =>
-    favouriteSongs.map((song: SongData, index: number) => {
+    favouriteSongs.map((song: Song, index: number) => {
       return (
         <div key={`${song.id}-${index}`} className="flex justify-center">
           <AlbumArtwork

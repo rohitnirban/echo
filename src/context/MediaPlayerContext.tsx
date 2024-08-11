@@ -75,6 +75,7 @@ export const MediaPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   }, []);
 
+
   const setIsPlayingState = (value: boolean) => {
     setIsPlaying(value);
   }
@@ -162,17 +163,18 @@ export const MediaPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
       const [nextSong, ...remainingQueue] = queue;
       setQueueState(remainingQueue);
+      console.log(nextSong);
       if (nextSong) {
         setSongDetails(
           nextSong.id,
           nextSong.name,
-          nextSong.artists?.primary?.[0]?.name || 'Unknown Artist',
-          nextSong.image?.[0]?.url || '',
-          nextSong.image?.[2]?.url || nextSong.image?.[0]?.url || ''
+          nextSong.artists.primary[0]?.name || 'Unknown Artist',
+          nextSong.image[0]?.url,
+          nextSong.image[2]?.url || nextSong.image[1]?.url,
         );
         setIsPlaying(true)
         if (audioRef.current) {
-          audioRef.current.src = nextSong.downloadUrl?.[4]?.url;
+          audioRef.current.src = nextSong.downloadUrl[4].url || nextSong.downloadUrl[0].url;
           audioRef.current.play().catch(error => console.error("Error playing next song:", error));
         }
       }

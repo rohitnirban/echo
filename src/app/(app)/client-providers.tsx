@@ -13,9 +13,7 @@ export default function ClientProviders({
 }>) {
   return (
     <QueryClientProvider client={queryClient}>
-      <MediaPlayerProvider>
-        {children}
-      </MediaPlayerProvider>
+      {children}
     </QueryClientProvider>
   );
 }

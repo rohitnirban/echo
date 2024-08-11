@@ -4,19 +4,24 @@ import TrendingModel from '@/models/Trending';
 
 export async function GET(
     request: Request,
+    { params }: { params: { region: string } }
 ) {
     await dbConnect();
+
+    const region = params.region || 'global';  // Use 'global' as default if region is not provided
 
     try {
         const todayStart = new Date(new Date().toISOString().split('T')[0]);
         const todayEnd = new Date(todayStart);
         todayEnd.setDate(todayEnd.getDate() + 1);
 
+        // Check if data for today and region already exists
         const existingData = await TrendingModel.findOne({
             date: {
                 $gte: todayStart,
                 $lt: todayEnd
-            }
+            },
+            region: region
         });
 
         if (existingData) {
@@ -30,12 +35,13 @@ export async function GET(
                 }
             });
         } else {
-            // Fetch new data from the YouTube API
+            const regionCode = region === 'india' ? 'IN' : ''; // Add more regions as needed
+
             const response = await axios.get('https://www.googleapis.com/youtube/v3/videos', {
                 params: {
                     part: 'snippet',
                     chart: 'mostPopular',
-                    regionCode: 'IN',
+                    regionCode: regionCode,
                     videoCategoryId: '10',
                     maxResults: 30,
                     key: process.env.NEXT_PUBLIC_YOUTUBE_API_KEY
@@ -58,7 +64,8 @@ export async function GET(
 
             const trendingData = new TrendingModel({
                 titles: titles,
-                date: todayStart
+                date: todayStart,
+                region: region
             });
 
             try {

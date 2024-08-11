@@ -11,9 +11,7 @@ declare global {
 }
 
 export default function RazorpayButton() {
-    const [paymentVerified, setPaymentVerified] = useState(false);
     const [scriptLoaded, setScriptLoaded] = useState(false);
-
     const router = useRouter();
     const { toast } = useToast();
 
@@ -39,7 +37,6 @@ export default function RazorpayButton() {
         }
 
         try {
-            // First, create an order
             const orderRes = await axios.post('/api/v1/payment/create-order');
             const order = orderRes.data.order;
 
@@ -50,13 +47,17 @@ export default function RazorpayButton() {
                 name: "Echo Music",
                 description: "Echo Music Subscription",
                 image: "/logo.svg",
-                order_id: order.id, // This is important. It ensures you get all fields in the response
-                handler: function (response: any) {
-                    console.log(response);
-                    verifyPayment(response)
+                order_id: order.id,
+                handler: function (response:any) {
+                    verifyPayment(response);
+                },
+                prefill: {
+                    name: "Customer Name",
+                    email: "customer@example.com",
+                    contact: "9999999999"
                 },
                 notes: {
-                    address: "Razorpay Corporate Office"
+                    address: "Customer Address"
                 },
                 theme: {
                     color: "#020202"
@@ -64,6 +65,13 @@ export default function RazorpayButton() {
             };
 
             const paymentObject = new window.Razorpay(options);
+            paymentObject.on('payment.failed', function (response:any) {
+                toast({
+                    title: 'Payment Failed',
+                    description: response.error.description
+                });
+                router.replace('/payment-error');
+            });
             paymentObject.open();
         } catch (error) {
             console.error('Error creating order:', error);
@@ -74,32 +82,26 @@ export default function RazorpayButton() {
         }
     }
 
-    const verifyPayment = async (response: any) => {
+    const verifyPayment = async (response:any) => {
         try {
             const res = await axios.post('/api/v1/payment/verify', {
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_signature: response.razorpay_signature,
-            }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
             });
 
             if (res.data.success) {
-                setPaymentVerified(true);
                 router.replace('/payment-success');
             } else {
                 router.replace('/payment-error');
             }
-
         } catch (error) {
             console.error('Error verifying payment:', error);
-            router.replace('/payment-error')
+            router.replace('/payment-error');
             toast({
                 title: 'Error',
                 description: "Error verifying payment"
-            })
+            });
         }
     }
 

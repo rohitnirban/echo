@@ -42,7 +42,27 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   });
 
 
+  // const handlePlay = async (song: SongWithHistory) => {
+  //   if (audioRef.current) {
+  //     if (!song.downloadUrl || !song.image) return null;
+
+  //     await audioRef.current.pause(); // Pause any currently playing song
+
+  //     audioRef.current.src = song.downloadUrl[4].url; // Set the new song URL
+
+  //     const decodedAlbumName = decodeHTMLEntities(song.name);
+  //     setSongDetails(song.id, decodedAlbumName, song.artists.primary[0].name, song.image[0].url, song.image[2].url);
+  //     const similarSongs = await getSongsSuggestions(song.id);
+  //     addToQueue(similarSongs);
+
+  //     handlePlayPause(); // Update the play/pause state
+  //     // audioRef.current.play(); // Play the new song immediately
+  //     console.log("Song Played: " + decodedAlbumName);
+  //   }
+  // };
+
   const handlePlay = async (song: SongWithHistory) => {
+    console.log(song);
     if (audioRef.current) {
       if (!song.downloadUrl || !song.image) return null;
 
@@ -55,9 +75,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       const similarSongs = await getSongsSuggestions(song.id);
       addToQueue(similarSongs);
 
-      handlePlayPause(); // Update the play/pause state
-      // audioRef.current.play(); // Play the new song immediately
-      console.log("Song Played: " + decodedAlbumName);
+      // Play the new song immediately
+      try {
+        await audioRef.current.play();
+        console.log("Song Played: " + decodedAlbumName);
+      } catch (error) {
+        console.error("Error playing song:", error);
+      }
     }
   };
 
@@ -68,7 +92,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <Image src="/logo-without-bg.svg" alt="Logo" height={45} width={45} className="rounded-full h-18 w-18" />
           <span className="text-2xl font-bold">Echo</span>
         </Link>
-        <Button variant="ghost" size="icon" className="md:hidden" onClick={onClose}>
+        <Button variant="ghost" size="icon" className="lg:hidden" onClick={onClose}>
           <XIcon className="h-6 w-6" />
         </Button>
       </div>
@@ -107,7 +131,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <span>Favourite</span>
         </Link>
         <Link
-          href="#"
+          href="/for-you"
           className="flex items-center gap-3 rounded-md px-3 py-2 transition-colors hover:bg-[#1d1d1d] hover:text-white font-semibold"
           prefetch={false}
         >

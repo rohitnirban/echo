@@ -11,6 +11,7 @@ import { Dropdown } from "react-day-picker";
 import axios, { AxiosError } from "axios";
 import { useToast } from "./ui/use-toast";
 import { ApiResponse } from "@/types/ApiResponse";
+import { useEffect, useState } from "react";
 
 export interface Album {
   name: string
@@ -36,63 +37,113 @@ export function AlbumArtwork({
   image,
   ...props
 }: AlbumArtworkProps) {
-  const { isPlaying, handlePlayPause, audioRef, setSongDetails, addToQueue, addToQueueNext } = useMediaPlayer();
+  const { isPlaying, handlePlayPause, audioRef, setSongDetails, addToQueue, addToQueueNext, setIsPlayingState } = useMediaPlayer();
 
   const decodedAlbumName = decodeHTMLEntities(album.name);
   const { toast } = useToast();
 
   const handlePlay = async () => {
     if (audioRef.current) {
-      console.log("First", audioRef.current.src);
       if (!songUrl || !image) return null;
 
-      if (isPlaying) {
-        audioRef.current.pause();
-      }
+      await audioRef.current.pause(); // Pause any currently playing song
+      setIsPlayingState(false);
 
-      audioRef.current.src = songUrl;
-      console.log("Second", audioRef.current.src);
+      audioRef.current.src = songUrl; // Set the new song URL
+
+      const decodedAlbumName = decodeHTMLEntities(album.name);
       setSongDetails(album.songID, decodedAlbumName, album.artist, image, album.cover);
       const similarSongs = await getSongsSuggestions(album.songID);
-      addToQueue(similarSongs)
-      handlePlayPause();
+      addToQueue(similarSongs);
+
+      // Play the new song immediately
+      try {
+        await audioRef.current.play();
+        setIsPlayingState(true);
+        console.log("Song Played: " + decodedAlbumName);
+      } catch (error) {
+        console.error("Error playing song:", error);
+      }
     }
-    console.log("Song Played: " + decodedAlbumName);
   };
 
-  const handleAddToLibrary = async (songID: string) => {
+  const [isInLibrary, setIsInLibrary] = useState(false);
+  const [isFavourite, setIsFavourite] = useState(false);
+
+  const checkSongIsInLibrary = async () => {
     try {
-      const response = await axios.post(`/api/v1/library/add-song/${songID}`);
+      const response = await axios.get(`/api/v1/library/check-library/${album.songID}`);
+      setIsInLibrary(response.data.message); // Adjust based on your API response
+    } catch (error) {
+      console.error("Error checking if song is in library:", error);
+    }
+  }
+
+  const checkSongIsFavourite = async () => {
+    try {
+      const response = await axios.get(`/api/v1/favourite/check-favourite/${album.songID}`);
+      setIsFavourite(response.data.message); // Adjust based on your API response
+    } catch (error) {
+      console.error("Error checking if song is favourite:", error);
+    }
+  }
+
+  const handleToggleLibrary = async (songID: string) => {
+    try {
+        const endpoint = isInLibrary 
+            ? `/api/v1/library/remove-song/${songID}` 
+            : `/api/v1/library/add-song/${songID}`;
+        const response = await axios.post(endpoint);
+
+        if (response.data.success) { // Check if the response indicates a successful operation
+            setIsInLibrary(!isInLibrary);
+        }
+
+        toast({
+            title: 'Success',
+            description: response.data.message
+        });
+    } catch (error) {
+        const axiosError = error as AxiosError<ApiResponse>;
+        toast({
+            title: "Error",
+            description: axiosError.response?.data.message || "Failed to toggle song library status",
+            variant: "destructive"
+        });
+    }
+}
+
+
+  const handleToggleFavourite = async (songID: string) => {
+    try {
+      const endpoint = isFavourite ? `/api/v1/favourite/remove-song/${songID}` : `/api/v1/favourite/add-song/${songID}`;
+      const response = await axios.post(endpoint);
       toast({
         title: 'Success',
         description: response.data.message
-      })
+      });
+      console.log(response.data.message);
+      setIsFavourite(!isFavourite);
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>;
+      console.log(axiosError);
       toast({
         title: "Error",
-        description: axiosError.response?.data.message || "Failed to add song to libaray",
+        description: axiosError.response?.data.message || "Failed to toggle song favourite status",
         variant: "destructive"
       })
     }
   }
 
-  const handleAddToFavourite = async (songID: string) => {
-    try {
-      const response = await axios.post(`/api/v1/favourite/add-song/${songID}`);
-      toast({
-        title: 'Success',
-        description: response.data.message
-      })
-    } catch (error) {
-      const axiosError = error as AxiosError<ApiResponse>;
-      toast({
-        title: "Error",
-        description: axiosError.response?.data.message || "Failed to add song to favourite",
-        variant: "destructive"
-      })
-    }
-  }
+  useEffect(() => {
+    // Reset states when a new song is loaded
+    setIsInLibrary(false);
+    setIsFavourite(false);
+
+    // Check if the current song is in the library and if it is favorited
+    checkSongIsInLibrary();
+    checkSongIsFavourite();
+  }, [album.songID, audioRef]);
 
   const handlePlayNext = () => {
     if (!songUrl || !image) return null;
@@ -115,7 +166,7 @@ export function AlbumArtwork({
 
 
   return (
-    <div className={cn("space-y-3", className)} {...props}>
+    <div className={cn("space-y-3 z-20", className)} {...props}>
       <div className="overflow-hidden rounded-md cursor-pointer relative group">
         <Image
           src={album.cover}
@@ -140,23 +191,35 @@ export function AlbumArtwork({
                 />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-[#020202] text-white border-none">
-                <DropdownMenuItem className="hover:bg-[#1d1d1d]" onClick={handlePlayNext}>
+                {/* <DropdownMenuItem className="hover:bg-[#1d1d1d]" onClick={handlePlayNext}>
                   <IconPlayerTrackNextFilled className="mr-2 h-4 w-4" />
                   <span>Play Next</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="hover:bg-[#1d1d1d]" onClick={() => handleAddToLibrary(album.songID)}>
-                  <Library className="mr-2 h-4 w-4" />
-                  <span>Add to Library</span>
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
 
-                <DropdownMenuItem className="hover:bg-[#1d1d1d]" onClick={() => handleAddToFavourite(album.songID)}>
+                {!isInLibrary ? <DropdownMenuItem className="hover:bg-[#1d1d1d]" onClick={() => handleToggleLibrary(album.songID)}>
+                  <Library className="mr-2 h-4 w-4" />
+                  <span>Add to Saved</span>
+                </DropdownMenuItem>
+                  :
+                  <DropdownMenuItem className="hover:bg-[#1d1d1d]" onClick={() => handleToggleLibrary(album.songID)}>
+                    <Library className="mr-2 h-4 w-4" />
+                    <span>Remove from Saved</span>
+                  </DropdownMenuItem>
+                }
+                {!isFavourite ? <DropdownMenuItem className="hover:bg-[#1d1d1d]" onClick={() => handleToggleFavourite(album.songID)}>
                   <HeartIcon className="mr-2 h-4 w-4" />
                   <span>Add to Favourite</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="hover:bg-[#1d1d1d]">
+                  :
+                  <DropdownMenuItem className="hover:bg-[#1d1d1d]" onClick={() => handleToggleFavourite(album.songID)}>
+                    <HeartIcon className="mr-2 h-4 w-4" />
+                    <span>Remove from Favourite</span>
+                  </DropdownMenuItem>
+                }
+                {/* <DropdownMenuItem className="hover:bg-[#1d1d1d]">
                   <IconShare className="mr-2 h-4 w-4" />
                   <span>Share</span>
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

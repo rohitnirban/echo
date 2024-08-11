@@ -59,7 +59,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
     const getSong = async () => {
         if (songQuery.length >= 3) {
             try {
-                const response = await axios.get(`https://saavn-api-sigma.vercel.app/api/search/songs?query=${songQuery}&page=1&limit=10`);
+                const response = await axios.get(`https://saavn-api-sigma.vercel.app/api/search/songs?query=${songQuery}&page=1&limit=20`);
                 if (response.data.success === true) {
                     setSongResult(response.data.data.results);
                     setIsDropdownOpen(true);
@@ -101,6 +101,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
     }, [isDropdownOpen]);
 
     const handlePlay = async (song: Song) => {
+        console.log(song);
         if (audioRef.current) {
             if (!song.downloadUrl || !song.image) return null;
 
@@ -113,9 +114,13 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
             const similarSongs = await getSongsSuggestions(song.id);
             addToQueue(similarSongs);
 
-            handlePlayPause(); // Update the play/pause state
-            // audioRef.current.play(); // Play the new song immediately
-            console.log("Song Played: " + decodedAlbumName);
+            // Play the new song immediately
+            try {
+                await audioRef.current.play();
+                console.log("Song Played: " + decodedAlbumName);
+            } catch (error) {
+                console.error("Error playing song:", error);
+            }
         }
     };
 
@@ -130,7 +135,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
     return (
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-700 bg-[#020202] px-4 shadow-sm md:px-6">
             <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" className="lg:hidden bg-white" onClick={onMenuClick}>
+                <Button variant="ghost" size="icon" className="lg:hidden bg-[#6cf61d] text-white" onClick={onMenuClick}>
                     <MenuIcon className="h-6 w-6" />
                     <span className="sr-only">Toggle Sidebar</span>
                 </Button>
@@ -149,12 +154,12 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                     />
 
                     {isDropdownOpen && (
-                        <div ref={dropdownRef} className="absolute top-full mt-2 w-full bg-[#020202] text-white shadow-lg z-50 overflow-auto max-h-96">
+                        <div ref={dropdownRef} className="absolute top-full mt-2 w-full bg-[#020202] text-white shadow-lg z-[10000] overflow-auto max-h-96">
                             {songResult.map((songData, index) => (
                                 <p key={index} onClick={() => handlePlay(songData)} className="text-left flex items-center p-2 hover:bg-black hover:text-white hover:cursor-pointer">
                                     <img src={songData.image[0].url} alt="" className="w-12 h-12 object-cover" />
                                     <p className="flex flex-col justify-center text-left ml-4">
-                                        <span className="truncate">{songData.name}</span>
+                                        <span className="truncate">{decodeHTMLEntities(songData.name)}</span>
                                         <span className="text-sm text-gray-400 truncate">{songData.artists.primary.map(artist => artist.name).join(', ')}</span>
                                     </p>
                                 </p>
@@ -326,32 +331,12 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
                                 </DialogContent>
                             </Dialog>
                         </DropdownMenuItem>
-
-                        <DropdownMenuItem className='p-2 hover:bg-[#1d1d1d]'>
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <Link href="/#" className='flex items-center'>
-                                        <CreditCardIcon />
-                                        <span className='ml-2'>Subscription</span>
-                                    </Link>
-                                </DialogTrigger>
-                                <DialogContent className="sm:max-w-[725px] w-[90vw] max-h-[90vh] overflow-y-auto bg-[#1d1d1d] text-white border-none" onClick={(e) => e.stopPropagation()}>
-                                    <DialogHeader>
-                                        <DialogTitle className="text-white">Subscription</DialogTitle>
-                                        <DialogDescription className="text-gray-400">
-                                            Get your echo subscription for a month
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <SubscriptionModal />
-                                </DialogContent>
-                            </Dialog>
-                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className='cursor-pointer' onClick={() => signOut()}>Logout</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
                 :
-                <Button className="bg-[#6cf61d] text-black hover:bg-[#6cf61d]/70 " onClick={() => signIn("google")}>Login</Button>
+                <Button className="ml-2 bg-[#6cf61d] text-black hover:bg-[#6cf61d]/70 " onClick={() => signIn("google")}>Login</Button>
             }
         </header>
     )

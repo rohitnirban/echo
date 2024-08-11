@@ -1,6 +1,7 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/models/User";
+import { Types } from "mongoose";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -61,6 +62,14 @@ export async function POST(
             songId: songID,
             playedAt: new Date(),
         };
+
+        // await user.save();
+
+        
+        // Ensure only the last 10 entries are kept
+        if (user.songHistory.length >= 10) {
+            user.songHistory = user.songHistory.slice(-10) as Types.DocumentArray<typeof user.songHistory[0]>;
+        }
 
         user.songHistory.push(newSongHistory);
         await user.save();

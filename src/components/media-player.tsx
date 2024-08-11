@@ -46,7 +46,7 @@ export default function MediaPlayer({ src, songTitle, artist, image }: MediaPlay
                 .then(() => console.log('Song added to history'))
                 .catch((error) => console.error('Failed to add song to history:', error));
         }
-    }, [isPlaying, songID]);
+    }, [songID]);
 
     const handleMuteToggle = useCallback(() => {
         if (audioRef.current) {
@@ -126,7 +126,7 @@ export default function MediaPlayer({ src, songTitle, artist, image }: MediaPlay
                 )}
                 <div className="hidden md:flex items-center gap-4">
                     <div onClick={toggleRepeat} className="cursor-pointer">
-                        <RepeatIcon className={`w-6 h-6 ${repeatMode === 'one' ? 'text-[#6cf61d]' : ''}`} repeatOne={repeatMode === 'one'} />
+                        <RepeatIcon className={`w-6 h-6 ${repeatMode === 'one' ? 'text-[#6cf61d]' : ''}`} repeatone={repeatMode === 'one'} />
                     </div>
                     <div className="p-2 cursor-pointer" onClick={handleMuteToggle}>
                         {isMuted ? <Volume className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
@@ -137,7 +137,7 @@ export default function MediaPlayer({ src, songTitle, artist, image }: MediaPlay
                 </div>
             </div>
 
-            <div className={`absolute mb-[5rem] bottom-0 left-0 -z-10 w-full overflow-auto transition-all duration-300 ease-in-out transform bg-[blue] ${isQueueVisible ? 'translate-y-0' : 'translate-y-[100rem]'}`}>
+            <div className={`absolute mb-[5rem] bottom-0 left-0 -z-10 w-full overflow-auto transition-all duration-300 ease-in-out transform bg-[#020202] ${isQueueVisible ? 'translate-y-0' : 'translate-y-[100rem]'}`}>
                 <Queue />
             </div>
         </div>
@@ -222,8 +222,8 @@ function PlayIcon(props: React.SVGProps<SVGSVGElement>) {
     );
 }
 
-function RepeatIcon(props: React.SVGProps<SVGSVGElement> & { repeatOne?: boolean }) {
-    if (props.repeatOne) {
+function RepeatIcon(props: React.SVGProps<SVGSVGElement> & { repeatone?: boolean }) {
+    if (props.repeatone) {
         return (
             <svg
                 {...props}
@@ -246,7 +246,7 @@ function RepeatIcon(props: React.SVGProps<SVGSVGElement> & { repeatOne?: boolean
         );
     }
 
-    // Return the original RepeatIcon if repeatOne is false
+    // Return the original RepeatIcon if repeatone is false
     return (
         <svg
             {...props}

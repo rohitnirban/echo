@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface Trending extends Document {
     titles: string[];
     date: Date;
+    region: string;
 }
 
 const trendingSchema: Schema<Trending> = new Schema({
@@ -13,6 +14,10 @@ const trendingSchema: Schema<Trending> = new Schema({
     date: {
         type: Date,
         default: Date.now
+    },
+    region: {
+        type: String,
+        default: 'india'
     }
 });
 

@@ -3,7 +3,7 @@ import dbConnect from "@/lib/dbConnect";
 import FavouriteModel from "@/models/Favourite";
 import { getServerSession } from "next-auth";
 
-export async function POST(
+export async function GET(
     request: Request,
     { params }: { params: { songId: string } }
 ) {
@@ -24,28 +24,22 @@ export async function POST(
         );
     }
 
-    const songID = params.songId;
+    const songID = params.songId
 
-    if (!songID) {
-        return Response.json(
-            {
-                success: false,
-                message: "Song ID is required to remove song"
-            },
-            {
-                status: 400
-            }
-        );
-    }
 
     try {
-        let favourite = await FavouriteModel.findOne({ user: _user._id });
+
+        const favourite = await FavouriteModel.findOne({
+            user: _user._id,
+            songs: songID
+        });
+
 
         if (!favourite) {
             return Response.json(
                 {
                     success: false,
-                    message: "Nothing in favourite"
+                    message: "Nothing in Favourite"
                 },
                 {
                     status: 404
@@ -53,42 +47,24 @@ export async function POST(
             )
         }
 
-        const updatedFavourite = await FavouriteModel.findOneAndUpdate(
-            { user: _user._id },
-            { $pull: { songs: songID } }, // Remove the songID directly
-            { new: true }
-        );
-
-
-        if (!updatedFavourite) {
-            return Response.json(
-                {
-                    success: false,
-                    message: "Failed to remove song from favourite"
-                },
-                {
-                    status: 400
-                }
-            );
-        }
-
         return Response.json(
             {
                 success: true,
-                message: "Song removed successfully",
-                favourite: updatedFavourite
+                message: true
             },
             {
                 status: 200
             }
-        );
+        )
+
+
 
     } catch (error) {
-        console.error("Error removing song:", error);
+        console.error("Error adding new song:", error);
         return Response.json(
             {
                 success: false,
-                message: "Error removing song"
+                message: "Error adding new song"
             },
             {
                 status: 500

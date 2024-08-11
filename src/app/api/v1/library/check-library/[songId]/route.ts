@@ -1,9 +1,10 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import dbConnect from "@/lib/dbConnect";
+import FavouriteModel from "@/models/Favourite";
 import LibraryModel from "@/models/Library";
 import { getServerSession } from "next-auth";
 
-export async function POST(
+export async function GET(
     request: Request,
     { params }: { params: { songId: string } }
 ) {
@@ -24,28 +25,22 @@ export async function POST(
         );
     }
 
-    const songID = params.songId;
+    const songID = params.songId
 
-    if (!songID) {
-        return Response.json(
-            {
-                success: false,
-                message: "Song ID is required to remove song"
-            },
-            {
-                status: 400
-            }
-        );
-    }
 
     try {
-        let library = await LibraryModel.findOne({ user: _user._id });
+
+        const library = await LibraryModel.findOne({
+            user: _user._id,
+            songs: songID
+        });
+
 
         if (!library) {
             return Response.json(
                 {
                     success: false,
-                    message: "Nothing in Library"
+                    message: "Nothing in library"
                 },
                 {
                     status: 404
@@ -53,42 +48,24 @@ export async function POST(
             )
         }
 
-        // Remove song logic
-        const updatedLibrary = await LibraryModel.findOneAndUpdate(
-            { user: _user._id },
-            { $pull: { songs: { _id: songID } } },
-            { new: true }
-        );
-
-        if (!updatedLibrary) {
-            return Response.json(
-                {
-                    success: false,
-                    message: "Failed to remove song from library"
-                },
-                {
-                    status: 400
-                }
-            );
-        }
-
         return Response.json(
             {
                 success: true,
-                message: "Song removed successfully",
-                library: updatedLibrary
+                message: true
             },
             {
                 status: 200
             }
-        );
+        )
+
+
 
     } catch (error) {
-        console.error("Error removing song:", error);
+        console.error("Error adding new song:", error);
         return Response.json(
             {
                 success: false,
-                message: "Error removing song"
+                message: "Error adding new song"
             },
             {
                 status: 500

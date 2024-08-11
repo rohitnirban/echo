@@ -6,9 +6,10 @@ import { useMediaPlayer } from "@/context/MediaPlayerContext";
 import { useQuery } from 'react-query';
 import axios from 'axios';
 import { Skeleton } from "@/components/ui/skeleton";
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { IconPlayerPlayFilled } from "@tabler/icons-react";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface SongData {
   id: string;
@@ -23,10 +24,11 @@ interface Artist {
   name: string;
 }
 
-const fetchTrendingSongs = async () => {
-  const response = await axios.get('/api/v1/trending/get-today');
+const fetchTrendingSongs = async (region: string) => {
+  const response = await axios.get(`/api/v1/trending/get-today/${region}`);
   return response.data.titles;
 };
+
 
 const fetchSongsFromSavaan = async (trendingSongs: string[]) => {
   const currentYear = new Date().getFullYear().toString();
@@ -59,10 +61,11 @@ const AlbumArtworkSkeleton = () => (
 
 export default function Page() {
   const { songID, isPlaying } = useMediaPlayer();
+  const [region, setRegion] = useState('global');
 
   const { data: trendingSongs = [], isLoading: isTrendingLoading } = useQuery(
-    'trendingSongs',
-    fetchTrendingSongs,
+    ['trendingSongs', region],
+    () => fetchTrendingSongs(region),
     {
       cacheTime: 24 * 60 * 60 * 1000,
       staleTime: 24 * 60 * 60 * 1000,
@@ -123,9 +126,15 @@ export default function Page() {
               Top Songs which are currently pouplar, may change daily
             </p>
           </div>
-          <div className="bg-[#6cf61d] p-2 rounded-full">
-            <IconPlayerPlayFilled className="text-black" />
-          </div>
+          <Select onValueChange={setRegion}>
+            <SelectTrigger className="w-[180px] bg-[#020202] border-none z-10">
+              <SelectValue placeholder="Region" />
+            </SelectTrigger>
+            <SelectContent className='bg-[#020202] text-white border-none'>
+              <SelectItem value="global">Global</SelectItem>
+              <SelectItem value="india">India</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <Separator className='my-4 shadow' />
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
