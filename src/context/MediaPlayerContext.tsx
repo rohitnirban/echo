@@ -3,7 +3,6 @@
 import React, { createContext, useCallback, useContext, useRef, useState, useEffect } from "react";
 import { addSongsToQueue } from "@/helpers/queueUtils";
 import getSongsSuggestions from "@/helpers/getSongsSuggestions";
-import addNotification from 'react-push-notification';
 
 export interface Song {
   id: string;
@@ -137,12 +136,6 @@ export const MediaPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
     } catch (error) {
       console.error("Error adding songs to queue:", error);
-      addNotification({
-        title: 'Error',
-        message: 'Failed to add songs to queue',
-        theme: 'red',
-        duration: 3000,
-      });
     }
   }, []);
 
