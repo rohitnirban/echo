@@ -52,7 +52,6 @@
     "react-day-picker": "^8.10.1",
     "react-dom": "^18",
     "react-hook-form": "^7.52.1",
-    "react-push-notification": "^1.5.4",
     "react-query": "^3.39.3",
     "react-resizable-panels": "^2.0.20",
     "react-toastify": "^10.0.5",
