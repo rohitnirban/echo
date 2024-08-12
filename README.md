@@ -1,36 +1,33 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Echo
+
+Welcome to [Echo](https://music.rohitnirban.com) — your ultimate destination for free music streaming! Dive into an extensive library of songs, discover trending tracks, and curate your personal playlist effortlessly.
+
+## Features
+
+- **Free Music Streaming**: Listen to a vast collection of songs without any charges.
+
+- **Advanced Search**: Looking for a specific song? Use our robust search functionality to find any track instantly.
+
+- **Trending Songs**: Stay updated with what's hot! Explore trending songs globally or filter specifically for the Indian region.
+
+- **Favorites & Saved Songs**: Love a song? Add it to your favorites or save it for easy access later.
+
+- **Dynamic Song Queue**:
+  - **Automatic Queue Generation**: Based on the current song, get a dynamically generated queue of recommended tracks.
+  - **Queue Management**: Easily clear the queue, skip forward, or replay previous songs.
 
 ## Getting Started
 
-First, run the development server:
+1. **Browse or Search**: Start by browsing the trending sections or use the search bar to find specific songs.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2. **Play & Enjoy**: Click on any song to start playing. Control playback using the on-screen controls.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. **Manage Your Music**:
+   - **Add to Favorites**: Click the heart icon to favorite a song.
+   - **Save for Later**: Use the save option to keep songs in your personal list.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+4. **Queue Control**: Access your song queue to see upcoming tracks, clear the list, or navigate between songs.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+---
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Experience music like never before with seamless streaming and intuitive features. Visit [Echo](https://music.rohitnirban.com) today!
