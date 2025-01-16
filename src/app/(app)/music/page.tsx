@@ -23,7 +23,7 @@ const fetchLatestSongsFromSavaan = async () => {
 
 const fetchTopSongsFromSavaan = async (query: string) => {
   const response = await axios.get(
-    `https://saavn-api-sigma.vercel.app/api/search/songs?query=${query}`
+    `https://saavn.dev/api/search/songs?query=${query}`
   );
 
   const data = response.data.data.results;
