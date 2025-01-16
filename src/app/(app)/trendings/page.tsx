@@ -33,7 +33,7 @@ const fetchTrendingSongs = async (region: string) => {
 const fetchSongsFromSavaan = async (trendingSongs: string[]) => {
   const currentYear = new Date().getFullYear().toString();
   const promises = trendingSongs.map(songQuery =>
-    axios.get(`https://saavn-api-sigma.vercel.app/api/search/songs?query=${encodeURIComponent(songQuery)}&page=1&limit=1`)
+    axios.get(`https://saavn.dev/api/search/songs?query=${encodeURIComponent(songQuery)}&page=1&limit=1`)
   );
 
   const responses = await Promise.all(promises);
