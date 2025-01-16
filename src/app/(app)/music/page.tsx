@@ -13,7 +13,7 @@ import { useMemo } from "react";
 
 const fetchLatestSongsFromSavaan = async () => {
   const response = await axios.get(
-    'https://saavn-api-sigma.vercel.app/api/search/songs?query=latest'
+    'https://saavn.dev/api/search/songs?query=latest'
   );
 
   const data = response.data.data.results;
