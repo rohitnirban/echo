@@ -7,9 +7,9 @@ import { useQuery } from 'react-query';
 import axios from 'axios';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMemo, useState } from 'react';
-import { IconPlayerPlayFilled } from "@tabler/icons-react";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import server from "@/lib/apiServer";
 
 interface SongData {
   id: string;
@@ -33,7 +33,7 @@ const fetchTrendingSongs = async (region: string) => {
 const fetchSongsFromSavaan = async (trendingSongs: string[]) => {
   const currentYear = new Date().getFullYear().toString();
   const promises = trendingSongs.map(songQuery =>
-    axios.get(`https://saavn-api-sigma.vercel.app/api/search/songs?query=${encodeURIComponent(songQuery)}&page=1&limit=1`)
+    axios.get(`${server}/api/search/songs?query=${encodeURIComponent(songQuery)}&page=1&limit=1`)
   );
 
   const responses = await Promise.all(promises);

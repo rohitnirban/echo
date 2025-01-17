@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Play } from "lucide-react";
 import { IconPlayerPlayFilled } from "@tabler/icons-react";
 import { useSession } from "next-auth/react";
+import server from "@/lib/apiServer";
 
 
 interface Artist {
@@ -23,7 +24,7 @@ const fetchFavouriteSongs = async () => {
 };
 
 const fetchSongDetails = async (songId: string) => {
-  const response = await axios.get(`https://saavn.dev/api/songs/${songId}`);
+  const response = await axios.get(`${server}/api/songs/${songId}`);
   return response.data.data[0];
 };
 

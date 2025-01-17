@@ -9,11 +9,12 @@ import { useQuery } from 'react-query';
 import axios from 'axios';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMemo } from "react";
+import server from "@/lib/apiServer";
 
 
 const fetchLatestSongsFromSavaan = async () => {
   const response = await axios.get(
-    'https://saavn-api-sigma.vercel.app/api/search/songs?query=latest'
+    `${server}/api/search/songs?query=latest`
   );
 
   const data = response.data.data.results;
@@ -23,7 +24,7 @@ const fetchLatestSongsFromSavaan = async () => {
 
 const fetchTopSongsFromSavaan = async (query: string) => {
   const response = await axios.get(
-    `https://saavn-api-sigma.vercel.app/api/search/songs?query=${query}`
+    `${server}/api/search/songs?query=${query}`
   );
 
   const data = response.data.data.results;
