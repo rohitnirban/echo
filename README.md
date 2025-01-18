@@ -30,4 +30,4 @@ Welcome to [Echo](https://music.rohitnirban.com) — your ultimate destination f
 
 ---
 
-Experience music like never before with seamless streaming and intuitive features. Visit [Echo](https://music.rohitnirban.com) today!
+Experience music like never before with seamless streaming and intuitive features. Visit [Echo](https://music.rohitnirban.com) Now!
